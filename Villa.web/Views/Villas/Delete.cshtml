@@ -1,0 +1,116 @@
+﻿@using Villla.Domain.Entities
+@model Villa
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+
+                @* Header *@
+                <div class="card-header bg-danger bg-gradient text-white py-4 border-0">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-exclamation-triangle-fill fs-2 me-3"></i>
+                        <h2 class="mb-0 fw-bold">Delete Villa</h2>
+                    </div>
+                </div>
+
+                <div class="card-body p-5 bg-light">
+
+                    @* 🔥 Enhanced Alert *@
+                    <div class="alert alert-danger border-0 shadow-lg mb-4 p-4 rounded-4 position-relative overflow-hidden">
+
+                        @* Top Accent Line *@
+                        <div class="position-absolute top-0 start-0 w-100" style="height:4px; background: linear-gradient(90deg,#ff4d4f,#ff7875);"></div>
+
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <i class="bi bi-exclamation-triangle-fill fs-2 text-danger"></i>
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <h5 class="fw-bold mb-2 text-danger">
+                                    Danger Zone
+                                </h5>
+
+                                <p class="mb-2 fw-semibold">
+                                    Are you absolutely sure you want to delete this villa?
+                                </p>
+
+                                <p class="mb-0 text-muted small">
+                                    This action is <span class="fw-bold text-danger">permanent</span> and cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" class="row g-4">
+
+                        <input asp-for="Id" hidden />
+
+                        @* Name *@
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                <input asp-for="Name" disabled class="form-control border-0 shadow-sm bg-white" />
+                                <label asp-for="Name" class="ms-2">Villa Name</label>
+                            </div>
+                        </div>
+
+                        @* Description *@
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea asp-for="Description" disabled class="form-control border-0 shadow-sm bg-white" style="height: 100px"></textarea>
+                                <label asp-for="Description" class="ms-2">Villa Description</label>
+                            </div>
+                        </div>
+
+                        @* Price & Sqft *@
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="Price" disabled class="form-control border-0 shadow-sm bg-white" />
+                                <label asp-for="Price" class="ms-2">Price Per Night</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="Sqft" disabled class="form-control border-0 shadow-sm bg-white" />
+                                <label asp-for="Sqft" class="ms-2">Total Sqft</label>
+                            </div>
+                        </div>
+
+                        @* Preview Image *@
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <div class="col-12 text-center mt-3">
+                                <span class="badge bg-secondary mb-2">Item to be removed:</span>
+                                <div class="d-block">
+                                    <img src="@Model.ImageUrl" class="rounded-3 shadow-sm border border-danger border-2" style="max-width: 250px; opacity: 0.85;" alt="Villa Preview" />
+                                </div>
+                            </div>
+                        }
+
+                        @* Action Buttons *@
+                        <div class="col-12 mt-5">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+
+                                    <button type="submit"
+                                            onclick="return confirm('⚠️ Final warning: This action cannot be undone. Are you sure?')"
+                                            class="btn btn-danger w-100 py-3 rounded-3 shadow-sm fw-bold">
+                                        <i class="bi bi-trash3-fill me-2"></i> Yes, Delete Permanently
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <a asp-controller="Villas" asp-action="Index"
+                                       class="btn btn-secondary w-100 py-3 rounded-3 shadow-sm fw-bold">
+                                        Cancel & Go Back
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

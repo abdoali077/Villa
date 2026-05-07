@@ -1,0 +1,181 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    body {
+        font-family: 'Inter', 'Poppins', sans-serif;
+    }
+
+    .fw-black {
+        font-weight: 900;
+        letter-spacing: -1.5px;
+    }
+
+    /* تحسين الكارت ليكون متناسق */
+    .stat-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08) !important;
+        }
+
+    .icon-shape {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 1.5rem;
+    }
+
+    /* إصلاح مشكلة الـ Chart Container */
+    .chart-container {
+        position: relative;
+        margin-top: -10px;
+        margin-bottom: -10px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* تنسيق الـ Badge */
+    .ratio-badge {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .bg-success-soft {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    .bg-danger-soft {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+</style>
+
+<div class="container-fluid py-4">
+    <div class="row g-4">
+
+        <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+            <div class="card stat-card shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <p class="text-uppercase fw-bold text-muted mb-1" style="font-size: 0.7rem; letter-spacing: 1px;">
+                                Total Bookings
+                            </p>
+                            <h2 class="fw-black text-dark mb-0" id="totalBookingsCount">0</h2>
+                        </div>
+                        <div class="icon-shape bg-primary text-white shadow-sm">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div id="totalBookingsRadialChart"></div>
+                    </div>
+
+                    <div class="border-top pt-3 d-flex align-items-center justify-content-between">
+                        <div id="bookingRatioSection">
+                        </div>
+                        <span class="text-muted" style="font-size: 0.75rem;">Since last month</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        $(document).ready(function () {
+            loadBookingDashboardData();
+        });
+
+        function loadBookingDashboardData() {
+            $.ajax({
+                url: '@Url.Action("GetTotalBookingsData", "Dashboard")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    $('#totalBookingsCount').text(data.totalCount.toLocaleString());
+
+                    let ratioHtml = "";
+                    if (data.hasRatioIncreases) {
+                        ratioHtml = `<span class="ratio-badge bg-success-soft">
+                                        <i class="bi bi-arrow-up-short fs-5"></i> +${data.bookingsDifference}
+                                     </span>`;
+                    } else {
+                        ratioHtml = `<span class="ratio-badge bg-danger-soft">
+                                        <i class="bi bi-arrow-down-short fs-5"></i> ${data.bookingsDifference}
+                                     </span>`;
+                    }
+
+                    $('#bookingRatioSection').html(ratioHtml);
+                    renderRadialChart(data);
+                }
+            });
+        }
+
+        function renderRadialChart(data) {
+            var options = {
+                series: data.series,
+                chart: {
+                    type: 'radialBar',
+                    height: 200,
+                    sparkline: { enabled: true }
+                },
+                plotOptions: {
+                    radialBar: {
+                        hollow: { size: '60%' },
+                        track: { background: '#f8fafc' },
+                        dataLabels: {
+                            name: { show: false },
+                            value: {
+                                offsetY: 8,
+                                fontSize: '20px',
+                                fontWeight: '900',
+                                color: '#1e293b',
+                                formatter: function (val) { return val + "%"; }
+                            }
+                        }
+                    }
+                },
+                fill: {
+                    colors: [data.hasRatioIncreases ? '#10b981' : '#ef4444']
+                },
+                stroke: { lineCap: 'round' }
+            };
+
+            var chart = new ApexCharts(document.querySelector("#totalBookingsRadialChart"), options);
+            chart.render();
+        }
+    </script>
+}

@@ -1,0 +1,83 @@
+﻿@* @{
+    ViewData["Title"] = "My Bookings";
+}
+
+<div class="container py-5 mt-4">
+
+    <h2 class="fw-bold mb-4">Reservation History</h2>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table id="tblData" class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Check-In</th>
+                        <th>Nights</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+</div> *@
+
+@{
+    ViewData["Title"] = "My Bookings";
+}
+
+<div class="container py-5 mt-4">
+
+    <h2 class="fw-bold mb-4">Reservation History</h2>
+
+    <div class="mb-3 d-flex gap-2 align-items-center">
+        <label class="fw-semibold">Filter by Status:</label>
+
+        <select id="statusFilter" class="form-select w-25">
+            <option value="">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="CheckIn">CheckIn</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table id="tblData" class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Check-In</th>
+                        <th>Nights</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+
+@section Styles {
+  
+    <link rel="stylesheet" href="~/css/BookingIndex.css" />
+}
+@section Scripts{
+
+    <script src="~/js/Booking.js" asp-append-version="true"></script>
+}
+

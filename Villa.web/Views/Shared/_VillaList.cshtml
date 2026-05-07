@@ -1,0 +1,81 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@model HomeVM
+<div id="villaContainer">
+    <div class="container mt-5 pt-4">
+        <div class="row">
+
+            @foreach (var villa in Model.VillaList)
+            {
+                <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+
+                    <div class="card w-100 border-0 shadow-sm villa-card rounded-4 overflow-hidden">
+
+                        <img src="@villa.ImageUrl" class="card-img-top" style="height:240px; object-fit:cover;" />
+
+                        <div class="card-body p-4 d-flex flex-column">
+                            <h4 class="fw-bold">@villa.Name</h4>
+
+                            <div class="mt-auto">
+                                <hr />
+
+                                <div class="row g-2">
+
+                                    @if (SignInManager.IsSignedIn(User))
+                                    {
+                                        <div class="col-6">
+                                            <button class="btn btn-outline-dark w-100"
+                                                    onclick="openVillaDetails(@villa.Id)">
+                                                Details
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="col-6">
+                                            <a href="javascript:void(0)"
+                                               onclick="redirectToLogin(@villa.Id)"
+                                               class="btn btn-outline-dark w-100">
+                                                Details
+                                            </a>
+                                        </div>
+                                    }
+
+                                    @if (Model.CheckInDate >= DateOnly.FromDateTime(DateTime.Now))
+                                    {
+                                        @if (villa.IsAvailable)
+                                        {
+                                            <div class="col-6">
+                                                <a asp-controller="Booking"
+                                                   asp-action="FinalizeBooking"
+                                                   asp-route-villaId="@villa.Id"
+                                                   asp-route-checkInDate="@Model.CheckInDate"
+                                                   asp-route-nights="@Model.Nights"
+                                                   class="btn btn-primary w-100">
+                                                    Book
+                                                </a>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="col-6">
+                                                <button class="btn btn-outline-danger w-100" disabled>
+                                                    Sold Out
+                                                </button>
+                                            </div>
+                                        }
+                                    }
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

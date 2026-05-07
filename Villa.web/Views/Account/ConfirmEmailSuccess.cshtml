@@ -1,0 +1,149 @@
+﻿@{
+    ViewData["Title"] = "Email Confirmed";
+}
+
+
+<div class="confirm-wrapper">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-md-5">
+                <div class="card confirm-card border-0 shadow-2xl rounded-5 p-4 text-center">
+
+                    <div class="icon-box mb-4">
+                        <div class="main-icon">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        <div class="icon-ring"></div>
+                    </div>
+
+                    <div class="content-fade-in">
+                        <h1 class="fw-black text-dark mb-2">Success!</h1>
+                        <h4 class="text-primary fw-bold mb-3">Email Confirmed</h4>
+
+                        <p class="text-muted px-lg-4 mb-4">
+                            Your account is now active. Welcome to the world of luxury stays and unforgettable memories.
+                        </p>
+
+                        <div class="d-grid gap-2">
+                            <a asp-controller="Account" asp-action="Login"
+                               class="btn btn-primary btn-lg rounded-pill fw-bold py-3 shadow-lg hover-scale">
+                                <i class="bi bi-door-open-fill me-2"></i> Get Started
+                            </a>
+
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-link text-muted mt-2 fw-medium text-decoration-none">
+                                <i class="bi bi-house me-1"></i> Return Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+
+    .confirm-wrapper {
+        background: linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%);
+        min-height: 100vh;
+    }
+
+    .confirm-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        transform: translateY(0);
+        transition: all 0.4s ease;
+    }
+
+    .fw-black {
+        font-weight: 900;
+        letter-spacing: -1px;
+        font-size: 2.5rem;
+    }
+
+    .icon-box {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+    }
+
+    .main-icon {
+        background: #198754;
+        color: white;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 10px 20px rgba(25, 135, 84, 0.3);
+    }
+
+    .icon-ring {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 2px solid #198754;
+        border-radius: 50%;
+        animation: ring-pulse 2s infinite;
+        z-index: 1;
+    }
+
+    /* أنيميشن دخول المحتوى */
+    .content-fade-in {
+        animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .hover-scale:hover {
+        transform: scale(1.03);
+        box-shadow: 0 15px 30px rgba(13, 110, 253, 0.3) !important;
+    }
+
+    @@keyframes ring-pulse {
+        0% {
+            transform: scale(1);
+            opacity: 0.8;
+        }
+
+        100% {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    
+    .shadow-2xl {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08) !important;
+    }
+</style>
+
+<script>
+   
+    window.onload = function() {
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#0d6efd', '#198754', '#ffc107']
+        });
+    };
+</script>

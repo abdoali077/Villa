@@ -1,0 +1,247 @@
+﻿@model BookingDetailsVM
+
+@{
+    ViewData["Title"] = "Booking Details";
+    bool isAdmin = User.IsInRole(SD.Role_Admin);
+}
+
+
+
+<div class="container py-5 mt-4">
+
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Bookings</a></li>
+                    <li class="breadcrumb-item active">#@Model.bookingId</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark m-0">Reservation Details</h2>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-outline-dark rounded-pill px-4">
+                <i class="bi bi-printer me-2"></i>Print
+            </button>
+            <a asp-action="Index" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="bi bi-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+                <div class="row g-0">
+                    <div class="col-md-5">
+                        <img src="@Model.Villa?.ImageUrl" class="h-100 w-100" style="object-fit:cover; min-height:250px;" />
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h3 class="fw-bold text-primary mb-1">@Model.Name</h3>
+                                <div class="text-end">
+                                    <span class="info-label d-block">Price / Night</span>
+                                    <span class="h5 fw-bold text-dark">$@Model.Villa?.Price</span>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-4 text-truncate-2">@Model.Villa?.Description</p>
+
+                            <div class="row g-3">
+                                <div class="col-6 col-md-3">
+                                    <label class="info-label d-block">Check In</label>
+                                    <span class="info-value"><i class="bi bi-calendar-check me-1"></i>@Model.CheckInDate.ToShortDateString()</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="info-label d-block">Check Out</label>
+                                    <span class="info-value"><i class="bi bi-calendar-x me-1"></i>@Model.CheckOutDate.ToShortDateString()</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="info-label d-block">Total Nights</label>
+                                    <span class="info-value"><i class="bi bi-moon-stars me-1"></i>@Model.Nights</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="info-label d-block">Total Cost</label>
+                                    <span class="info-value text-success font-monospace">@Model.TotalCost.ToString("C")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-person-circle me-2 text-primary"></i>Guest Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="info-label">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope"></i></span>
+                                <input class="form-control border-start-0 ps-0" value="@Model.Email" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="info-label">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone"></i></span>
+                                <input class="form-control border-start-0 ps-0" value="@Model.PhoneNumber" readonly />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (isAdmin)
+            {
+                <div class="card shadow-sm border-0 rounded-4 card-admin mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold text-dark mb-4"><i class="bi bi-shield-lock me-2 text-danger"></i>Manager Control Panel</h5>
+                        <form method="post">
+                            <input asp-for="bookingId" hidden />
+                            <input asp-for="CheckInDate" hidden />
+                            <input asp-for="CheckOutDate" hidden />
+
+                            <div class="row g-4">
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold">Select Assigned Villa Number</label>
+                                    @if (Model.VillaNumbers != null && Model.VillaNumbers.Any())
+                                    {
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-primary text-white"><i class="bi bi-hash"></i></span>
+                                            <select asp-for="VillaNumber" class="form-select border-primary">
+                                                <option value="">-- Choose available unit --</option>
+                                                @foreach (var item in Model.VillaNumbers)
+                                                {
+                                                    <option value="@item.Villa_Number">Unit #@item.Villa_Number</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <input class="form-control bg-light" value="Unit #@(Model.VillaNumber ?? 0)" readonly />
+                                        <div class="form-text">Villa already assigned or no units available.</div>
+                                    }
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="info-label">Stripe Session ID</label>
+                                    <input class="form-control small font-monospace bg-light" value="@Model.StripeSessionId" readonly />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="info-label">Payment Intent</label>
+                                    <input class="form-control small font-monospace bg-light" value="@Model.StripePaymentIntentId" readonly />
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-top d-flex gap-2 flex-wrap">
+                                @if (Model.Status == BookingStatus.Approved)
+
+                                {
+                                    <button type="submit" asp-action="CheckIn" class="btn btn-success px-4 rounded-pill shadow-sm">Process Check-In</button>
+                                }
+                                @if (Model.Status == BookingStatus.CheckIn)
+                                {
+                                    <button type="submit" asp-action="CheckOut" class="btn btn-info text-white px-4 rounded-pill shadow-sm">Process Check-Out</button>
+                                }
+                                @if (Model.Status != BookingStatus.Cancelled && Model.Status != BookingStatus.Completed)
+                                {
+                                    <button type="submit" asp-action="CancelBooking" class="btn btn-danger px-4 rounded-pill shadow-sm">Cancel Reservation</button>
+                                }
+                                <button type="submit" asp-action="UpdateBookingDetails" class="btn btn-dark px-4 rounded-pill ms-auto">Update Data</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow border-0 rounded-4 sticky-summary">
+                <div class="card-header bg-primary py-3 border-0">
+                    <h5 class="text-white fw-bold mb-0 text-center">Reservation Summary</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between px-0 border-0 mb-2">
+                            <span class="text-muted">Status</span>
+                            <span class="badge bg-opacity-10 @(Model.Status == BookingStatus.Approved ? "bg-success text-success" : "bg-primary text-primary") status-badge">
+                                @Model.Status
+                            </span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between px-0 border-0 mb-2">
+                            <span class="text-muted">Payment Status</span>
+                            <span class="fw-bold @(Model.IsPaymentSuccessful ? "text-success" : "text-danger")">
+                                <i class="bi @(Model.IsPaymentSuccessful ? "bi-patch-check" : "bi-exclamation-circle") me-1"></i>
+                                @(Model.IsPaymentSuccessful ? "Payment Verified" : "Awaiting Payment")
+                            </span>
+                        </div>
+                        <hr />
+                        <div class="list-group-item d-flex justify-content-between px-0 border-0 small">
+                            <span class="text-muted">Reservation Date</span>
+                            <span class="fw-medium">@Model.BookingDate.ToShortDateString()</span>
+                        </div>
+                        @if (Model.PaymentDate != DateTime.MinValue)
+                        {
+                            <div class="list-group-item d-flex justify-content-between px-0 border-0 small">
+                                <span class="text-muted">Paid On</span>
+                                <span class="fw-medium">@Model.PaymentDate?.ToShortDateString()</span>
+                            </div>
+                        }
+                        @if (Model.ActualCheckInDate != DateTime.MinValue)
+                        {
+                            <div class="list-group-item d-flex justify-content-between px-0 border-0 small">
+                                <span class="text-muted">Actual In</span>
+                                <span class="fw-medium">@Model.ActualCheckInDate?.ToShortDateString()</span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-4 p-3 bg-light rounded-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">Total Charged</span>
+                            <span class="h4 fw-black text-primary mb-0">@Model.TotalCost.ToString("C")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .info-label {
+        font-size: 0.8rem;
+        text-uppercase: uppercase;
+        font-weight: 700;
+        color: #6c757d;
+        margin-bottom: 2px;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .card-admin {
+        border: 2px dashed #dee2e6 !important;
+        background-color: #f8f9fa;
+    }
+
+    .sticky-summary {
+        top: 100px;
+    }
+
+    .form-control[readonly] {
+        background-color: #ffffff;
+        border: 1px solid #e9ecef;
+        color: #495057;
+    }
+
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+</style>

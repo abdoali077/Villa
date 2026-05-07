@@ -1,0 +1,151 @@
+﻿@model FinalizeBookingVM
+
+@{
+    ViewData["Title"] = "Finalize Your Booking";
+}
+
+<div class="container py-5 mt-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary rounded-pill btn-sm px-3 shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Home
+        </a>
+    </div>
+
+    <form method="post" asp-action="FinalizeBooking">
+      
+        <input asp-for="VillaId" hidden />
+        @* <input asp-for="CheckOutDate" hidden />
+         <input asp-for="CheckInDate" hidden />
+        <input asp-for="Nights" hidden /> *@
+        <input type="hidden" id="pricePerNight" value="@Model.PricePerNight" />
+
+        <div class="row g-5">
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h3 class="fw-bold mb-4">Stay Details</h3>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Check-In Date</label>
+                            <input asp-for="CheckInDate" type="date" id="inputCheckIn"
+                                   class="form-control bg-light border-0 p-3 shadow-none" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Number of Nights</label>
+                            <input asp-for="Nights" type="number" id="inputNights" min="1"
+                                   class="form-control bg-light border-0 p-3 shadow-none" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h3 class="fw-bold mb-4">Guest Information</h3>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Full Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-person text-primary"></i></span>
+                                <input asp-for="Name" class="form-control bg-light border-0 p-3 shadow-none" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-envelope text-primary"></i></span>
+                                <input asp-for="Email" class="form-control bg-light border-0 p-3 shadow-none" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-telephone text-primary"></i></span>
+                                <input asp-for="PhoneNumber" class="form-control bg-light border-0 p-3 shadow-none" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 p-3 bg-primary bg-opacity-10 rounded-3 border border-primary border-opacity-25">
+                        <p class="small text-primary mb-0">
+                            <i class="bi bi-shield-check me-2"></i> Your personal data is secure.
+                        </p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4 rounded-pill fw-bold py-3 shadow">
+                        Confirm Booking & Pay <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden sticky-top" style="top: 100px;">
+                    <img src="@Model.ImageUrl" class="img-fluid" style="height: 200px; width:100%; object-fit: cover;">
+
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold text-dark mb-1">@Model.VillaName</h4>
+
+                        <div class="booking-details bg-light rounded-4 p-3 mb-4 mt-3">
+                            <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                                <span class="text-muted">Check-In</span>
+                                <span class="fw-bold" id="displayCheckIn">@Model.CheckInDate.ToShortDateString()</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                                <span class="text-muted">Check-Out</span>
+                                <span class="fw-bold" id="displayCheckOut">@Model.CheckOutDate.ToShortDateString()</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Duration</span>
+                                <span class="fw-bold"><span id="displayNights">@Model.Nights</span> Night(s)</span>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold mb-3">Price Summary</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">$@Model.PricePerNight x <span id="summaryNights">@Model.Nights</span> Nights</span>
+                            <span id="summaryTotal">$@Model.TotalCost</span>
+                        </div>
+                        <hr class="my-3 opacity-25">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="fw-black mb-0">Total</h4>
+                            <h3 class="fw-black text-primary mb-0" id="finalTotal">$@Model.TotalCost</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            const pricePerNight = parseFloat($('#pricePerNight').val());
+
+            function updateSummary() {
+                const checkInDateValue = $('#inputCheckIn').val();
+                const nights = parseInt($('#inputNights').val()) || 0;
+
+                if (checkInDateValue && nights > 0) {
+                    const checkInDate = new Date(checkInDateValue);
+
+                    // تحديث تاريخ الخروج
+                    const checkOutDate = new Date(checkInDate);
+                    checkOutDate.setDate(checkInDate.getDate() + nights);
+
+                    // تحديث العرض في الجهة اليمنى
+                    $('#displayCheckIn').text(checkInDate.toLocaleDateString());
+                    $('#displayCheckOut').text(checkOutDate.toLocaleDateString());
+                    $('#displayNights').text(nights);
+                    $('#summaryNights').text(nights);
+
+                    // تحديث السعر
+                    const total = pricePerNight * nights;
+                    $('#summaryTotal').text('$' + total.toLocaleString());
+                    $('#finalTotal').text('$' + total.toLocaleString());
+                }
+            }
+
+            $('#inputCheckIn, #inputNights').on('change input', updateSummary);
+        });
+    </script>
+}

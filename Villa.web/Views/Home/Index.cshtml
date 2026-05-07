@@ -1,0 +1,280 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@model HomeVM
+
+@{
+    ViewData["Title"] = "Luxury Villas";
+}
+
+<!-- HERO -->
+<div class="position-relative overflow-hidden p-5 text-center bg-dark text-white mb-5 hero-bg">
+    <div class="container py-5">
+        <h1 class="display-3 fw-bold mb-3 mt-4 animate-up">Find Your Dream Escape</h1>
+        <p class="lead mb-4 opacity-75">Discover handpicked luxury villas for your next unforgettable stay.</p>
+    </div>
+</div>
+
+<!-- SEARCH -->
+<div class="container search-wrapper">
+    <div class="card border-0 shadow-lg search-card">
+
+        <form id="searchForm" method="post" asp-action="Index">
+
+            <input type="hidden" name="scroll" id="scrollInput" />
+
+            <div class="row g-0 align-items-center">
+
+                <div class="col-lg-3 col-md-6 border-end-lg search-item">
+                    <div class="p-3">
+                        <label class="small fw-bold text-uppercase text-muted px-3">Check-In</label>
+                        <input type="date" class="form-control border-0 bg-transparent shadow-none"
+                               asp-for="CheckInDate" />
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6 border-end-lg search-item">
+                    <div class="p-3">
+                        <label class="small fw-bold text-uppercase text-muted px-3">Nights</label>
+                        <input type="number" class="form-control border-0 bg-transparent shadow-none"
+                               asp-for="Nights" min="1" />
+                    </div>
+                </div>
+
+                <div class="col-lg-3 d-none d-lg-block border-end-lg search-item">
+                    <div class="p-3 opacity-75">
+                        <label class="small fw-bold text-uppercase text-muted px-3">Check-Out</label>
+                        <input type="date" class="form-control border-0 bg-transparent shadow-none"
+                               asp-for="CheckOutDate" disabled />
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-12 p-2">
+                    <button type="submit" class="btn btn-primary rounded-pill w-100 py-3 fw-bold">
+                        <i class="bi bi-search"></i>
+                        Check Availability
+                    </button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div id="villaContainer">
+@await Html.PartialAsync("_VillaList", Model)
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="villaDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5>Villa Details</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body" id="villaModalBody">
+                Loading...
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPT -->
+@* <script>
+
+    // =========================
+    // AJAX SEARCH (NO RELOAD)
+    // =========================
+    document.getElementById("searchForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+       
+        formData.set("scroll", window.scrollY);
+
+        fetch('/Home/Index', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.text())
+        .then(html => {
+
+            const doc = new DOMParser().parseFromString(html, "text/html");
+
+            const newVilla = doc.querySelector("#villaContainer");
+
+            document.querySelector("#villaContainer").innerHTML =
+                newVilla.innerHTML;
+
+         
+            document.querySelector("#villaContainer")
+                .scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+    });
+
+
+    // =========================
+    // DETAILS MODAL
+    // =========================
+    function openVillaDetails(id) {
+
+        const modal = new bootstrap.Modal(
+            document.getElementById('villaDetailsModal')
+        );
+
+        modal.show();
+
+        fetch('/Villas/GetDetails?id=' + id)
+            .then(r => r.text())
+            .then(data => {
+                document.getElementById("villaModalBody").innerHTML = data;
+            });
+    }
+
+
+    // =========================
+    // LOGIN + STATE SAVE
+    // =========================
+    function redirectToLogin(villaId) {
+
+        const scroll = window.scrollY;
+
+        const url = new URL(window.location.href);
+
+        url.searchParams.set("villaId", villaId);
+        url.searchParams.set("scroll", scroll);
+
+        window.location.href =
+            `/Account/Login?returnUrl=${encodeURIComponent(url.pathname + url.search)}`;
+    }
+
+
+    // =========================
+    // RESTORE AFTER LOGIN
+    // =========================
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const params = new URLSearchParams(window.location.search);
+
+        const scroll = parseInt(params.get("scroll") || "0");
+        const villaId = params.get("villaId");
+
+        setTimeout(() => {
+
+            if (scroll > 0) {
+                window.scrollTo({
+                    top: scroll,
+                    behavior: "smooth"
+                });
+            }
+
+            if (villaId) {
+                openVillaDetails(villaId);
+            }
+
+        }, 200);
+    });
+
+</script> *@
+
+@section Scripts {
+    <script src="~/js/IndexHome.js" asp-append-version="true"></script>
+}
+<style>
+    /* Hero Style */
+    .hero-bg {
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1600&q=80');
+        background-size: cover;
+        background-position: center;
+        border-radius: 0 0 50px 50px;
+        min-height: 450px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Search Bar Responsive Logic */
+    .search-wrapper {
+        margin-top: -60px; /* Adjusted from -100px for mobile safety */
+        position: relative;
+        z-index: 10;
+        padding: 0 15px;
+    }
+
+    .search-card {
+        background: white;
+        border-radius: 100px; /* Default Pill */
+        padding: 5px;
+    }
+
+    /* Mobile & Tablet Adjustments */
+    @@media (max-width: 991.98px) {
+        .search-card {
+            border-radius: 25px !important; /* Switch from Pill to Rounded Square */
+            padding: 15px;
+        }
+
+        .search-wrapper {
+            margin-top: -40px;
+        }
+
+        .search-item {
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 5px;
+        }
+
+            .search-item:last-of-type {
+                border-bottom: none;
+            }
+    }
+
+    /* Desktop Borders */
+    @@media (min-width: 992px) {
+        .border-end-lg {
+            border-right: 1px solid #eee !important;
+        }
+
+        .search-card {
+            padding: 5px 5px 5px 25px;
+        }
+    }
+
+    /* Villa Cards Hover */
+    .villa-card {
+        transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    }
+
+        .villa-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+        }
+
+    /* Modal Backdrop */
+    .modal-backdrop.show {
+        opacity: 0.7;
+        backdrop-filter: blur(4px);
+    }
+
+    .animate-up {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+

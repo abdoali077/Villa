@@ -1,0 +1,114 @@
+﻿body {
+    font-family: 'Poppins', sans-serif;
+    background: #f8f9fc;
+    overflow-x: hidden;
+}
+
+/* Sidebar Base Style */
+.sidebar {
+    min-height: 100vh;
+    background: #111827;
+    width: 260px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1050;
+    transition: all 0.3s ease-in-out;
+}
+
+.sidebar-brand {
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    padding: 25px 20px;
+    display: block;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+    .sidebar-brand span {
+        color: #0d6efd;
+    }
+
+.sidebar .nav-link {
+    color: #cbd5e1;
+    padding: 14px 20px;
+    border-radius: 10px;
+    margin: 6px 12px;
+    transition: .3s;
+    display: flex;
+    align-items: center;
+}
+
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+        background: #0d6efd;
+        color: white;
+    }
+
+    .sidebar .nav-link i {
+        margin-right: 10px;
+        font-size: 1.1rem;
+    }
+
+.main-wrapper {
+    margin-left: 260px;
+    transition: all 0.3s ease-in-out;
+    min-height: 100vh;
+}
+
+.topbar {
+    background: white;
+    border-bottom: 1px solid #eee;
+    padding: 15px 30px;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.content-area {
+    padding: 30px;
+}
+
+/* Mobile Adjustments */
+@@media(max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%); /* إخفاء تماماً يسار الشاشة */
+    }
+
+        .sidebar.active {
+            transform: translateX(0); /* إظهار عند التفعيل */
+        }
+
+    .main-wrapper {
+        margin-left: 0; /* إلغاء الهامش في الموبايل */
+    }
+    /* خلفية معتمة عند فتح القائمة في الموبايل */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1040;
+    }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+}
+
+#sidebarToggle {
+    cursor: pointer;
+    font-size: 1.5rem;
+    margin-right: 15px;
+    display: none; /* يظهر في الموبايل فقط */
+}
+
+@@media(max-width: 992px) {
+    #sidebarToggle {
+        display: block;
+    }
+}

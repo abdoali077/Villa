@@ -1,0 +1,104 @@
+﻿@model AmenityVM
+
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+
+                <!-- Header -->
+                <div class="card-header bg-dark bg-gradient text-white py-4 border-0">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-plus-circle-fill fs-2 me-3 text-primary"></i>
+                        <h2 class="mb-0 fw-bold">Create New Amenity</h2>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body p-5 bg-light">
+
+                    <form asp-action="Create" method="post" class="row g-4">
+
+                        @* <div class="col-md-12">
+                            <div class="form-floating">
+                                <input asp-for="@Model.Amenity.VillaId" class="form-control border-0 shadow-sm" placeholder="Amenity Name" />
+                                <label asp-for="@Model.Amenity.VillaId" class="ms-2">Amenity Name</label>
+                                <span asp-validation-for="@Model.Amenity.VillaId" class="text-danger small"></span>
+                            </div>
+                        </div> *@
+
+                        <!-- Name -->
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                <input asp-for="Amenity.Name" class="form-control border-0 shadow-sm" placeholder="Amenity Name" />
+                                <label asp-for="Amenity.Name" class="ms-2">Amenity Name</label>
+                                <span asp-validation-for="Amenity.Name" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea asp-for="Amenity.Description"
+                                          class="form-control border-0 shadow-sm"
+                                          style="height: 100px"
+                                          placeholder="Description"></textarea>
+
+                                <label asp-for="Amenity.Description" class="ms-2">Description</label>
+                                <span asp-validation-for="Amenity.Description" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Villa Dropdown -->
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                <select asp-for="Amenity.VillaId"
+                                        class="form-select border-0 shadow-sm"
+                                        asp-items="Model.VillaList ?? Enumerable.Empty<SelectListItem>()">
+
+                                   
+                                    <option disabled selected value="">-- Select Villa --</option>
+                                </select>
+
+                                <label asp-for="Amenity.VillaId" class="ms-2">Villa</label>
+                                <span asp-validation-for="Amenity.VillaId" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-12 mt-4">
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <button type="submit"
+                                            class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm">
+                                        <i class="bi bi-check2-circle me-2"></i>
+                                        Create Amenity
+                                    </button>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <a asp-controller="Amenity"
+                                       asp-action="Index"
+                                       class="btn btn-outline-secondary w-100 py-3 rounded-3">
+                                        Cancel & Go Back
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

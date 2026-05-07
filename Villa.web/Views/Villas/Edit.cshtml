@@ -1,0 +1,95 @@
+﻿@using Villla.Domain.Entities
+@model Villa
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                @* Card Header *@
+                <div class="card-header bg-dark bg-gradient text-white py-4 border-0">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-plus-circle-fill fs-2 me-3 text-primary"></i>
+                        <h2 class="mb-0 fw-bold">Update Villa</h2>
+                    </div>
+                </div>
+
+                <div class="card-body p-5 bg-light">
+
+                    <form method="post" class="row g-4" enctype="multipart/form-data">
+
+                        @* Name Input *@
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                <input asp-for="Name" class="form-control border-0 shadow-sm" placeholder="Villa Name" />
+                                <label asp-for="Name" class="ms-2">Villa Name</label>
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        @* Description Input *@
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea asp-for="Description" class="form-control border-0 shadow-sm" style="height: 100px" placeholder="Description"></textarea>
+                                <label asp-for="Description" class="ms-2">Villa Description</label>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        @* Price & Sqft *@
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="Price" class="form-control border-0 shadow-sm" placeholder="Price" />
+                                <label asp-for="Price" class="ms-2">Price Per Night</label>
+                                <span asp-validation-for="Price" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="Sqft" class="form-control border-0 shadow-sm" placeholder="Sqft" />
+                                <label asp-for="Sqft" class="ms-2">Total Sqft</label>
+                                <span asp-validation-for="Sqft" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        @* Occupancy & Image Upload *@
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="Occupancy" class="form-control border-0 shadow-sm" placeholder="Occupancy" />
+                                <label asp-for="Occupancy" class="ms-2">Max Occupancy</label>
+                                <span asp-validation-for="Occupancy" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="ImageUrl" class="text-muted small ms-2 mb-1">Upload Villa Image</label>
+                                <input asp-for="Image" type="file" class="form-control border-0 shadow-sm" />
+                                <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        @* Action Buttons *@
+                        <div class="col-12 mt-5">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 shadow-sm fw-bold transition-all">
+                                        <i class="bi bi-check2-circle me-2"></i> Update Villa
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <a asp-controller="Villas" asp-action="Index" class="btn btn-outline-secondary w-100 py-3 rounded-3">
+                                        Cancel & Go Back
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

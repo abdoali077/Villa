@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Panel</title>
+    @* <link rel="stylesheet" href="~/css/AdminDashboard.css" asp-append-version="true" /> *@
+
+    @await RenderSectionAsync("Styles", required: false)
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fc;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Base Style */
+        .sidebar {
+            height: 100vh;
+            background: #111827;
+            width: 260px; /* العرض الافتراضي */
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1050;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+
+            /* عندما يكون الـ Sidebar مخفياً أو منكمشاً */
+            .sidebar.collapsed {
+                left: -260px;
+            }
+
+        .sidebar-brand {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            padding: 25px 20px;
+            display: block;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+            .sidebar-brand span {
+                color: #0d6efd;
+            }
+
+        .sidebar .nav-link {
+            color: #cbd5e1;
+            padding: 14px 20px;
+            border-radius: 10px;
+            margin: 6px 12px;
+            transition: .3s;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+            .sidebar .nav-link:hover, .sidebar .nav-link.active {
+                background: #0d6efd;
+                color: white;
+            }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            margin-left: 260px; /* العرض الافتراضي */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100vh;
+            width: calc(100% - 260px); /* يضمن أن الـ content يأخذ المساحة المتبقية */
+        }
+
+            /* عندما يتمدد المحتوى (عند إخفاء الـ Sidebar) */
+            .main-wrapper.expanded {
+                margin-left: 0;
+                width: 100%;
+            }
+
+        .topbar {
+            background: white;
+            border-bottom: 1px solid #eee;
+            padding: 15px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        #sidebarToggle {
+            cursor: pointer;
+            font-size: 1.5rem;
+            margin-right: 15px;
+            color: #111827;
+        }
+
+        .content-area {
+            padding: 30px;
+        }
+
+        /* التوافق مع الشاشات الصغيرة */
+        @@media(max-width: 992px) {
+            .sidebar {
+                left: -260px;
+            }
+                /* مخفي افتراضياً في الموبايل */
+                .sidebar.active {
+                    left: 0;
+                }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar-overlay" id="overlay"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="d-flex justify-content-between align-items-center pe-3">
+            <a asp-controller="Dashboard" asp-action="Index" class="sidebar-brand">
+                VILLA<span>WEB</span>
+            </a>
+            <button class="btn btn-link text-white d-lg-none" id="closeSidebar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="mt-3">
+            <a asp-controller="Dashboard" asp-action="Index" class="nav-link">
+                <i class="bi bi-grid"></i> Dashboard
+            </a>
+            <a asp-controller="Villas" asp-action="Index" class="nav-link">
+                <i class="bi bi-house-door"></i> Villas
+            </a>
+            <a asp-controller="Amenity" asp-action="Index" class="nav-link">
+                <i class="bi bi-star"></i> Amenities
+            </a>
+            <a asp-controller="VillaNumber" asp-action="Index" class="nav-link">
+                <i class="bi bi-hash"></i> Villa Numbers
+            </a>
+            <a asp-controller="Booking" asp-action="Index" class="nav-link">
+                <i class="bi bi-calendar-check"></i> Bookings
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="nav-link mt-4 border-top pt-4" style="border-color: rgba(255,255,255,0.1) !important;">
+                <i class="bi bi-globe"></i> View Website
+            </a>
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+
+        <div class="topbar d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-list" id="sidebarToggle"></i>
+                <div>
+                    <h5 class="mb-0 fw-bold d-none d-sm-block">Admin Dashboard</h5>
+                    <small class="text-muted d-none d-sm-block">Manage your system professionally</small>
+                </div>
+            </div>
+
+            <div>
+                <partial name="_LoginPartial" />
+            </div>
+        </div>
+
+        <div class="content-area">
+            <partial name="_Notification" />
+            @RenderBody()
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/apexcharts.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // فتح القائمة
+            $('#sidebarToggle').on('click', function () {
+                $('#sidebar').addClass('active');
+                $('#overlay').addClass('show');
+            });
+
+            // إغلاق القائمة (عن طريق الزر أو الضغط على الخلفية المعتمة)
+            $('#closeSidebar, #overlay').on('click', function () {
+                $('#sidebar').removeClass('active');
+                $('#overlay').removeClass('show');
+            });
+
+            // جعل الرابط النشط يأخذ كلاس active برمجياً بناءً على الـ URL الحالي
+            const currentUrl = window.location.pathname;
+            $('.sidebar .nav-link').each(function() {
+                if ($(this).attr('href') === currentUrl) {
+                    $(this).addClass('active');
+                }
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

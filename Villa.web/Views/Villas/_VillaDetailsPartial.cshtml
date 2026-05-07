@@ -1,0 +1,73 @@
+﻿@* @model Villa
+
+<div class="row">
+
+    <div class="col-md-6">
+        <img src="@Model.ImageUrl"
+             class="img-fluid rounded-4 shadow-sm" />
+    </div>
+
+    <div class="col-md-6">
+
+        <h3 class="fw-bold">@Model.Name</h3>
+
+        <p class="text-muted">
+            Luxury villa with premium amenities.
+        </p>
+
+        <h5 class="text-primary fw-bold">
+            $@Model.Price / night
+        </h5>
+
+        <hr />
+
+        <h6 class="fw-bold">Amenities</h6>
+
+        @foreach (var a in Model.Amenities)
+        {
+            <span class="badge bg-light text-dark border me-1 mb-1">
+                @a.Name
+            </span>
+        }
+
+    </div>
+
+</div> *@
+
+
+@model Villa
+
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4 mt-4">
+    <h4 class="fw-bold mb-4 border-bottom pb-2 text-primary">
+        <i class="bi bi-house-heart me-2"></i>Villa Details
+    </h4>
+    <div class="row align-items-center">
+        <div class="col-md-5">
+            <img src="@Model.ImageUrl" class="img-fluid rounded-4 shadow-sm mb-3 mb-md-0" alt="@Model.Name" />
+        </div>
+        <div class="col-md-7">
+            <h3 class="fw-bold text-dark mb-1">@Model.Name</h3>
+            <p class="text-muted mb-3">
+                <i class="bi bi-geo-alt me-1"></i> Premium location with luxury amenities.
+            </p>
+
+            <div class="mb-3">
+                <span class="h5 text-primary fw-bold">$@Model.Price.ToString("N2")</span>
+                <span class="text-muted small"> / night</span>
+            </div>
+
+            <h6 class="fw-bold text-uppercase small text-muted mb-2">Key Amenities</h6>
+            <div class="d-flex flex-wrap gap-1">
+                @if (Model.Amenities != null)
+                {
+                    @foreach (var amenity in Model.Amenities)
+                    {
+                        <span class="badge bg-light text-dark border-0 shadow-sm px-3 py-2 rounded-pill">
+                            <i class="bi bi-check2-circle text-success me-1"></i> @amenity.Name
+                        </span>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

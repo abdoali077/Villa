@@ -1,0 +1,30 @@
+﻿@if (TempData["success"] != null || TempData["error"] != null)
+{
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+        (function () {
+
+            toastr.options = {
+                "positionClass": "toast-top-right",
+                "timeOut": "3000",
+                "closeButton": true,
+                "progressBar": true
+            };
+
+            var success = '@Html.Raw(TempData["success"])';
+            var error = '@Html.Raw(TempData["error"])';
+
+            if (success) {
+                toastr.success(success);
+            }
+
+            if (error) {
+                toastr.error(error);
+            }
+
+        })();
+    </script>
+}

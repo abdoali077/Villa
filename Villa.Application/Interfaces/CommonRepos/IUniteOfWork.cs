@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Villla.Application.Interfaces.CommonRepos
+{
+    public interface IUnitOfWork
+    {
+        IVillaRepository Villas { get; }
+        IVillaNumberRepository VillaNumbers { get; }
+        IAmenityRepository Amenities { get; }
+        IBookingRepository Bookings { get; }
+        IApplicationUserRepository ApplicationUsers { get; }
+        void Save();
+    }
+}

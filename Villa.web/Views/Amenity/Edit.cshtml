@@ -1,0 +1,76 @@
+﻿@model AmenityVM
+
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                @* Card Header *@
+                <div class="card-header bg-dark bg-gradient text-white py-4 border-0">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-plus-circle-fill fs-2 me-3 text-primary"></i>
+                        <h2 class="mb-0 fw-bold">Update Villa Amenity</h2>
+                    </div>
+                </div>
+
+                <div class="card-body p-5 bg-light">
+
+                    <form method="post" class="row g-4">
+                        <input asp-for="Amenity.Id" type="hidden" />
+
+                        @* Name Input *@
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                <input asp-for="Amenity.Name" class="form-control border-0 shadow-sm" placeholder="Villa Number" />
+                                <label asp-for="Amenity.Name" class="ms-2">Amenity Name</label>
+                                <span asp-validation-for="Amenity.Name" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        @* Special Details Input *@
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea asp-for="Amenity.Description" class="form-control border-0 shadow-sm" style="height: 100px" placeholder="Special Details"></textarea>
+                                <label asp-for="Amenity.Description" class="ms-2">Villa Description</label>
+                                <span asp-validation-for="Amenity.Description" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                <select asp-for="Amenity.VillaId"
+                                        class="form-control border-0 shadow-sm"
+                                        asp-items="Model.VillaList">
+                                    <option value="">-- Select Villa --</option>
+                                </select>
+                                <label class="ms-2">Villa</label>
+                                <span asp-validation-for="Amenity.VillaId" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                      
+
+                        @* Action Buttons *@
+                        <div class="col-12 mt-5">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 shadow-sm fw-bold transition-all">
+                                        <i class="bi bi-check2-circle me-2"></i> Update Villa Number
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <a asp-controller="Amenity" asp-action="Index" class="btn btn-outline-secondary w-100 py-3 rounded-3">
+                                        Cancel & Go Back
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

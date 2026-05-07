@@ -1,0 +1,262 @@
+﻿@model Booking
+
+@{
+    ViewData["Title"] = "Booking Confirmation";
+}
+
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 text-center">
+            <div class="mb-4">
+                <div class="success-checkmark">
+                    <div class="check-icon">
+                        <span class="icon-line line-tip"></span>
+                        <span class="icon-line line-long"></span>
+                        <div class="icon-circle"></div>
+                        <div class="icon-fix"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h1 class="fw-black text-dark mb-2">Booking Confirmed!</h1>
+            <p class="lead text-muted mb-5">Thank you for choosing VillaWeb. Your luxury stay is officially reserved.</p>
+
+            <div class="card border-0 shadow-lg rounded-5 overflow-hidden mb-5 confirmation-ticket">
+                <div class="bg-primary p-3 text-white">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Booking Receipt</h5>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <div class="row g-4 text-start">
+                        <div class="col-md-6 border-bottom pb-3 border-md-bottom-0 pb-md-0 border-md-end">
+                            <label class="small text-uppercase text-muted fw-bold d-block mb-1">Booking ID</label>
+                            <span class="h5 fw-bold text-primary">#VW-@Model.Id.ToString("D5")</span>
+                        </div>
+
+                        <div class="col-md-6 ps-md-4">
+                            <label class="small text-uppercase text-muted fw-bold d-block mb-1">Total Amount Paid</label>
+                            <span class="h5 fw-bold text-success">$@Model.TotalCost.ToString("N2")</span>
+                        </div>
+
+                        <div class="col-md-6 border-bottom pb-3 border-md-bottom-0 pb-md-0 border-md-end">
+                            <label class="small text-uppercase text-muted fw-bold d-block mb-1">Booking Date</label>
+                            <span class="fw-semibold">@Model.BookingDate.ToString("dd MMM yyyy, hh:mm tt")</span>
+                        </div>
+
+                        <div class="col-md-6 ps-md-4">
+                            <label class="small text-uppercase text-muted fw-bold d-block mb-1">Current Status</label>
+                            @{
+                                var statusClass = Model.Status switch
+                                {
+                                    "Approved" => "bg-success text-success",
+                                    "Pending" => "bg-warning text-warning",
+                                    "CheckIn" => "bg-info text-info",
+                                    "Completed" => "bg-primary text-primary",
+                                    "Cancelled" => "bg-danger text-danger",
+                                    _ => "bg-secondary text-secondary"
+                                };
+
+                                var statusIcon = Model.Status switch
+                                {
+                                    "Approved" => "bi-check-circle-fill",
+                                    "Pending" => "bi-clock-history",
+                                    "CheckIn" => "bi-house-check-fill",
+                                    "Completed" => "bi-patch-check-fill",
+                                    "Cancelled" => "bi-x-circle-fill",
+                                    _ => "bi-question-circle"
+                                };
+                            }
+                            <span class="badge @statusClass bg-opacity-10 px-3 py-2 rounded-pill fw-bold">
+                                <i class="bi @statusIcon me-1"></i> @Model.Status
+                            </span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 opacity-10">
+
+                    <div class="alert alert-info border-0 rounded-4 p-3 d-flex align-items-center mb-0">
+                        <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                        <p class="small mb-0 text-start">
+                            A confirmation email has been sent to your inbox with all the check-in details and villa rules.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm transition-up">
+                    Go to Homepage
+                </a>
+                <button onclick="window.print()" class="btn btn-outline-dark btn-lg rounded-pill px-5 fw-bold transition-up">
+                    <i class="bi bi-printer me-2"></i> Print Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f4f7f6;
+    }
+
+    .fw-black {
+        font-weight: 900;
+        letter-spacing: -1px;
+    }
+
+    /* تأثير الـ Ticket */
+    .confirmation-ticket {
+        position: relative;
+    }
+
+        .confirmation-ticket::before, .confirmation-ticket::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 20px;
+            height: 20px;
+            background-color: #f4f7f6;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .confirmation-ticket::before {
+            left: -10px;
+        }
+
+        .confirmation-ticket::after {
+            right: -10px;
+        }
+
+    .transition-up:hover {
+        transform: translateY(-3px);
+    }
+
+    /* أنيميشن علامة الصح (Success Checkmark) */
+    .success-checkmark {
+        width: 80px;
+        height: 115px;
+        margin: 0 auto;
+    }
+
+    .check-icon {
+        width: 80px;
+        height: 80px;
+        position: relative;
+        border-radius: 50%;
+        box-sizing: content-box;
+        border: 4px solid #4CAF50;
+    }
+
+        .check-icon::before {
+            top: 3px;
+            left: -2px;
+            width: 30px;
+            transform-origin: 100% 50%;
+            border-radius: 100px 0 0 100px;
+        }
+
+        .check-icon::after {
+            top: 0;
+            left: 30px;
+            width: 60px;
+            transform-origin: 0 50%;
+            border-radius: 0 100px 100px 0;
+            animation: rotatePlaceholder 4.25s ease-in;
+        }
+
+    .icon-line {
+        height: 5px;
+        background-color: #4CAF50;
+        display: block;
+        border-radius: 2px;
+        position: absolute;
+        z-index: 10;
+    }
+
+    .line-tip {
+        top: 46px;
+        left: 14px;
+        width: 25px;
+        transform: rotate(45deg);
+        animation: icon-line-tip 0.75s;
+    }
+
+    .line-long {
+        top: 38px;
+        right: 8px;
+        width: 47px;
+        transform: rotate(-45deg);
+        animation: icon-line-long 0.75s;
+    }
+
+    .icon-circle {
+        top: -4px;
+        left: -4px;
+        z-index: 10;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 4px solid rgba(76, 175, 80, .5);
+        box-sizing: content-box;
+        position: absolute;
+    }
+
+    @@keyframes icon-line-tip {
+        0% {
+            width: 0;
+            left: 1px;
+            top: 19px;
+        }
+
+        54% {
+            width: 0;
+            left: 1px;
+            top: 19px;
+        }
+
+        70% {
+            width: 50px;
+            left: -8px;
+            top: 37px;
+        }
+
+        84% {
+            width: 17px;
+            left: 21px;
+            top: 48px;
+        }
+
+        100% {
+            width: 25px;
+            left: 14px;
+            top: 46px;
+        }
+    }
+
+    @@keyframes icon-line-long {
+        0% {
+            width: 0;
+            right: 46px;
+            top: 54px;
+        }
+
+        65% {
+            width: 0;
+            right: 46px;
+            top: 54px;
+        }
+
+        84% {
+            width: 55px;
+            right: 0px;
+            top: 35px;
+        }
+
+        100% {
+            width: 47px;
+            right: 8px;
+            top: 38px;
+        }
+    }
+</style>

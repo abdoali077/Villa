@@ -1,0 +1,25 @@
+﻿ body{
+    /* خلفية ناعمة لتمييز الكارت */
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+ }
+
+.card {
+    transition: transform 0.3s ease;
+}
+
+.form-control:focus {
+    background-color: #fff !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    border: 1px solid #0d6efd !important;
+}
+
+.input-group-text {
+    font-size: 1.2rem;
+}
+
+.transition-up:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3) !important;
+}
+
