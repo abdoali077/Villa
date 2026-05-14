@@ -10,44 +10,10 @@ using MailKit.Net.Smtp;
 using System.Text;
 using System.Threading.Tasks;
 using Villla.Application.Interfaces.Services;
-using Villla.Infrastructure.Settings;
+using Villla.Application.Settings;
 
 namespace Villla.Infrastructure.CommonImplementation.Services
 {
-    //public class EmailService : IEmailService
-    //{
-    //    private readonly EmailSettings _settings;
-
-    //    public EmailService(IOptions<EmailSettings> settings)
-    //    {
-    //        _settings = settings.Value;
-    //    }
-
-    //    public async Task SendEmailAsync(string email, string subject, string message)
-    //    {
-    //        // 1. Create SMTP Client
-    //        var smtpClient = new SmtpClient(_settings.Host, _settings.Port)
-    //        {
-    //            Credentials = new NetworkCredential(_settings.Email, _settings.Password),
-    //            EnableSsl = true
-    //        };
-
-    //        // 2. Create Mail Message
-    //        var mailMessage = new MailMessage
-    //        {
-    //            From = new MailAddress(_settings.Email, _settings.SenderName),
-    //            Subject = subject,
-    //            Body = message,
-    //            IsBodyHtml = true
-    //        };
-
-    //        // 3. Add Receiver
-    //        mailMessage.To.Add(email);
-
-    //        // 4. Send Email
-    //        await smtpClient.SendMailAsync(mailMessage);
-    //    }
-    //}
     public class EmailService : IEmailService
     {
         private readonly EmailSettings _settings;

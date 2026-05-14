@@ -1,14 +1,15 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Villla.Application.Application.Extension;
 using Villla.Application.Interfaces.CommonRepos;
 using Villla.Application.Interfaces.Services;
 using Villla.Application.Services.Implementation;
 using Villla.Application.Services.Interface;
+using Villla.Application.Settings;
 using Villla.Domain.Entities;
 using Villla.Infrastructure.CommonImplementation.Services;
 using Villla.Infrastructure.Data;
 using Villla.Infrastructure.RepositoryImplementation;
-using Villla.Infrastructure.Settings;
 
 namespace Villaa.web
 {
@@ -38,15 +39,9 @@ namespace Villaa.web
             builder.Services.Configure<EmailSettings>(
             builder.Configuration.GetSection("EmailSettings"));
 
-
-            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUnitOfWork, UniteOfWork>();
-            builder.Services.AddScoped<IDashboardService, DashboardService>();
-            builder.Services.AddScoped<IVillaService, VillaService>();
-            builder.Services.AddScoped<IAmenityService, AmenityService>();
-            builder.Services.AddScoped<IVillaNumberService, VillaNumberService>();
-            builder.Services.AddScoped<IAccountService, AccountService>();
-            builder.Services.AddScoped<IHomeService, HomeService>();
+
+            builder.Services.AddApplicationLayer();
             //Stripe.StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
             Stripe.StripeConfiguration.ApiKey =Environment.GetEnvironmentVariable("STRIPE_SECRET");
             var app = builder.Build();
