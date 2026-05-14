@@ -46,6 +46,7 @@ namespace Villaa.web
             builder.Services.AddScoped<IAmenityService, AmenityService>();
             builder.Services.AddScoped<IVillaNumberService, VillaNumberService>();
             builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<IHomeService, HomeService>();
             //Stripe.StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
             Stripe.StripeConfiguration.ApiKey =Environment.GetEnvironmentVariable("STRIPE_SECRET");
             var app = builder.Build();
