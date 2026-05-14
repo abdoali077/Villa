@@ -1,4 +1,4 @@
-﻿@model VillaNumberVM
+﻿@model VillaNumberDto
 
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -44,21 +44,21 @@
 
                     <form method="post" class="row g-4">
 
-                        <input asp-for="VillaNumber.Villa_Number" hidden />
+                        <input asp-for="VillaNumber" hidden />
 
                         @* Name *@
                         <div class="col-md-12">
                             <div class="form-floating">
-                                <input asp-for="VillaNumber.Villa_Number" disabled class="form-control border-0 shadow-sm bg-white" readonly />
-                                <label asp-for="VillaNumber.Villa_Number" class="ms-2">Villa Number</label>
+                                <input asp-for="VillaNumber" disabled class="form-control border-0 shadow-sm bg-white" readonly />
+                                <label asp-for="VillaNumber" class="ms-2">Villa Number</label>
                             </div>
                         </div>
 
                         @* SpecialDetails *@
                         <div class="col-12">
                             <div class="form-floating">
-                                <textarea asp-for="VillaNumber.SpecialDetails" disabled class="form-control border-0 shadow-sm bg-white" style="height: 100px"></textarea>
-                                <label asp-for="VillaNumber.SpecialDetails" class="ms-2">Villa Special Details</label>
+                                <textarea asp-for="SpecialDetails" disabled class="form-control border-0 shadow-sm bg-white" style="height: 100px"></textarea>
+                                <label asp-for="SpecialDetails" class="ms-2">Villa Special Details</label>
                             </div>
                         </div>
 

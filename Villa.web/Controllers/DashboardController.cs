@@ -1,106 +1,54 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Villla.Application.Interfaces.CommonRepos;
-using Villla.Application.Utility;
-using Villla.Web.ViewModels;
+using Villla.Application.Services.Interface;
 
 namespace Villla.Web.Controllers
 {
     [Authorize]
     public class DashboardController : Controller
     {
-        private readonly IUnitOfWork _uow;
+        private readonly IDashboardService _dashboardService;
 
-        public DashboardController(IUnitOfWork uow)
+        public DashboardController(IDashboardService dashboardService)
         {
-            _uow = uow;
+            _dashboardService = dashboardService;
         }
 
-        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
+        // ================= BOOKINGS =================
         [HttpGet]
-        public IActionResult GetTotalBookingsData()
+        public async Task<IActionResult> GetTotalBookingsData()
         {
-            var today = DateTime.Now;
+            var data = await _dashboardService.GetBookingsDataAsync();
+            return Json(data);
+        }
 
-            // Current Month Start
-            var currentMonthStartDate =
-                new DateTime(today.Year, today.Month, 1);
+        // ================= USERS =================
+        [HttpGet]
+        public async Task<IActionResult> GetTotalRegisterUserData()
+        {
+            var data = await _dashboardService.GetUsersDataAsync();
+            return Json(data);
+        }
 
-            // Previous Month Start
-            var previousMonthDate =
-                currentMonthStartDate.AddMonths(-1);
+        // ================= REVENUE =================
+        [HttpGet]
+        public async Task<IActionResult> GetTotalRevenueData()
+        {
+            var data = await _dashboardService.GetRevenueDataAsync();
+            return Json(data);
+        }
 
-            var previousMonthStartDate =
-                new DateTime(previousMonthDate.Year,
-                             previousMonthDate.Month, 1);
-
-            // Previous Month End
-            var previousMonthEndDate =
-                currentMonthStartDate.AddDays(-1);
-
-            var bookings = _uow.Bookings.GetAll(u =>
-                u.Status != BookingStatus.Cancelled &&
-                u.Status != BookingStatus.Pending);
-
-            // Total Valid Bookings
-            var totalBookings = bookings.Count();
-
-            // Current Month Bookings
-            var countByCurrentMonth = bookings.Count(u =>
-                u.BookingDate >= currentMonthStartDate &&
-                u.BookingDate <= today);
-
-            // Previous Month Bookings
-            var countByPreviousMonth = bookings.Count(u =>
-                u.BookingDate >= previousMonthStartDate &&
-                u.BookingDate <= previousMonthEndDate);
-
-            // Difference Count
-            int bookingsDifference =
-                countByCurrentMonth - countByPreviousMonth;
-
-            decimal increaseDecreaseAmount = 0;
-            bool hasRatioIncrease = false;
-
-            // If previous month = 0 and current > 0
-            if (countByPreviousMonth == 0 && countByCurrentMonth > 0)
-            {
-                increaseDecreaseAmount = 100;
-                hasRatioIncrease = true;
-            }
-            else if (countByPreviousMonth > 0)
-            {
-                increaseDecreaseAmount =
-                    ((decimal)(countByCurrentMonth - countByPreviousMonth)
-                    / countByPreviousMonth) * 100;
-
-                if (increaseDecreaseAmount > 0)
-                {
-                    hasRatioIncrease = true;
-                }
-            }
-
-            // Max chart value = 100
-            decimal[] series = new decimal[]
-            {
-                Math.Min(Math.Abs(increaseDecreaseAmount), 100)
-            };
-
-            var result = new RadialBarChartVM
-            {
-                TotalCount = totalBookings,
-                IncreaseDecreaseAmount = Math.Round(increaseDecreaseAmount, 2),
-                HasRatioIncreases = hasRatioIncrease,
-                Series = series,
-                BookingsDifference = bookingsDifference
-            };
-
-            return Json(result);
+        // ================= PIE CHART =================
+        [HttpGet]
+        public async Task<IActionResult> GetCustomerBookingPieChart()
+        {
+            var data = await _dashboardService.GetCustomerPieChartAsync();
+            return Json(data);
         }
     }
 }

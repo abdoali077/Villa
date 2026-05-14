@@ -1,4 +1,4 @@
-﻿@model VillaNumberVM
+﻿@model VillaNumberDto
 
 @using Microsoft.AspNetCore.Mvc.Rendering
 
@@ -28,30 +28,30 @@
                         </div> *@
                           <div class="col-md-12">
                             <div class="form-floating">
-                                <input asp-for="VillaNumber.Villa_Number" class="form-control border-0 shadow-sm" placeholder="Villa Number" />
-                                <label asp-for="VillaNumber.Villa_Number" class="ms-2">Villa Number</label>
-                                <span asp-validation-for="VillaNumber.Villa_Number" class="text-danger small"></span>
+                                <input asp-for="VillaNumber" class="form-control border-0 shadow-sm" placeholder="Villa Number" />
+                                <label asp-for="VillaNumber" class="ms-2">Villa Number</label>
+                                <span asp-validation-for="VillaNumber" class="text-danger small"></span>
                             </div>
                         </div>
 
                         @* Special Details Input *@
                         <div class="col-12">
                             <div class="form-floating">
-                                <textarea asp-for="VillaNumber.SpecialDetails" class="form-control border-0 shadow-sm" style="height: 100px" placeholder="Special Details"></textarea>
-                                <label asp-for="VillaNumber.SpecialDetails" class="ms-2">Villa Special Details</label>
-                                <span asp-validation-for="VillaNumber.SpecialDetails" class="text-danger small"></span>
+                                <textarea asp-for="SpecialDetails" class="form-control border-0 shadow-sm" style="height: 100px" placeholder="Special Details"></textarea>
+                                <label asp-for="SpecialDetails" class="ms-2">Villa Special Details</label>
+                                <span asp-validation-for="SpecialDetails" class="text-danger small"></span>
                             </div>
                         </div>
                        
                         <div class="col-md-12">
                             <div class="form-floating">
-                                <select asp-for="VillaNumber.VillaId"
+                                <select asp-for="VillaId"
                                         class="form-control border-0 shadow-sm"
                                         asp-items="@Model.VillaList">
                                     <option value="">-- Select Villa --</option>
                                 </select>
                                 <label class="ms-2">Villa</label>
-                                <span asp-validation-for="VillaNumber.VillaId" class="text-danger small"></span>
+                                <span asp-validation-for="VillaId" class="text-danger small"></span>
                             </div>
                         </div>
 

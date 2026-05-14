@@ -1,4 +1,4 @@
-﻿@model AmenityVM
+﻿@model AmenityDto
 
 
 <div class="container py-5">
@@ -16,34 +16,34 @@
                 <div class="card-body p-5 bg-light">
 
                     <form method="post" class="row g-4">
-                        <input asp-for="Amenity.Id" type="hidden" />
+                        <input asp-for="Id" type="hidden" />
 
                         @* Name Input *@
                         <div class="col-md-12">
                             <div class="form-floating">
-                                <input asp-for="Amenity.Name" class="form-control border-0 shadow-sm" placeholder="Villa Number" />
-                                <label asp-for="Amenity.Name" class="ms-2">Amenity Name</label>
-                                <span asp-validation-for="Amenity.Name" class="text-danger small"></span>
+                                <input asp-for="Name" class="form-control border-0 shadow-sm" placeholder="Villa Number" />
+                                <label asp-for="Name" class="ms-2">Amenity Name</label>
+                                <span asp-validation-for="Name" class="text-danger small"></span>
                             </div>
                         </div>
 
                         @* Special Details Input *@
                         <div class="col-12">
                             <div class="form-floating">
-                                <textarea asp-for="Amenity.Description" class="form-control border-0 shadow-sm" style="height: 100px" placeholder="Special Details"></textarea>
-                                <label asp-for="Amenity.Description" class="ms-2">Villa Description</label>
-                                <span asp-validation-for="Amenity.Description" class="text-danger small"></span>
+                                <textarea asp-for="Description" class="form-control border-0 shadow-sm" style="height: 100px" placeholder="Special Details"></textarea>
+                                <label asp-for="Description" class="ms-2">Villa Description</label>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
                             </div>
                         </div>
                         <div class="col-md-12">
                             <div class="form-floating">
-                                <select asp-for="Amenity.VillaId"
+                                <select asp-for="VillaId"
                                         class="form-control border-0 shadow-sm"
                                         asp-items="Model.VillaList">
                                     <option value="">-- Select Villa --</option>
                                 </select>
-                                <label class="ms-2">Villa</label>
-                                <span asp-validation-for="Amenity.VillaId" class="text-danger small"></span>
+                                <label asp-for="VillaId" class="ms-2">Villa</label>
+                                <span asp-validation-for="VillaId" class="text-danger small"></span>
                             </div>
                         </div>
 

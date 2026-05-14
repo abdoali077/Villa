@@ -1,4 +1,4 @@
-﻿@model AmenityVM
+﻿@model AmenityDto
 
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -44,21 +44,21 @@
 
                     <form method="post" class="row g-4">
 
-                        <input asp-for="Amenity.Id" hidden />
+                        <input asp-for="Id" hidden />
 
                         @* Name *@
                         <div class="col-md-12">
                             <div class="form-floating">
-                                <input asp-for="Amenity.Name" disabled class="form-control border-0 shadow-sm bg-white" readonly />
-                                <label asp-for="Amenity.Name" class="ms-2">Amenity Name</label>
+                                <input asp-for="Name" disabled class="form-control border-0 shadow-sm bg-white" readonly />
+                                <label asp-for="Name" class="ms-2">Amenity Name</label>
                             </div>
                         </div>
 
                         @* SpecialDetails *@
                         <div class="col-12">
                             <div class="form-floating">
-                                <textarea asp-for="Amenity.Description" disabled class="form-control border-0 shadow-sm bg-white" style="height: 100px"></textarea>
-                                <label asp-for="Amenity.Description" class="ms-2">Amenity Description</label>
+                                <textarea asp-for="Description" disabled class="form-control border-0 shadow-sm bg-white" style="height: 100px"></textarea>
+                                <label asp-for="Description" class="ms-2">Amenity Description</label>
                             </div>
                         </div>
 

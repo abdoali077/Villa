@@ -12,103 +12,198 @@
     }
 
     body {
-        font-family: 'Inter', 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
+        background-color: #f1f5f9;
     }
 
     .fw-black {
         font-weight: 900;
-        letter-spacing: -1.5px;
+        letter-spacing: -1px;
     }
 
-    /* تحسين الكارت ليكون متناسق */
     .stat-card {
         background: var(--card-bg);
-        border: 1px solid rgba(0,0,0,0.05);
-        border-radius: 20px;
+        border: none;
+        border-radius: 16px;
         transition: all 0.3s ease;
-        overflow: hidden;
     }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.08) !important;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
         }
 
     .icon-shape {
-        width: 48px;
-        height: 48px;
+        width: 42px;
+        height: 42px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 12px;
-        font-size: 1.5rem;
+        border-radius: 10px;
+        font-size: 1.2rem;
     }
 
-    /* إصلاح مشكلة الـ Chart Container */
     .chart-container {
-        position: relative;
-        margin-top: -10px;
-        margin-bottom: -10px;
         width: 100%;
         display: flex;
         justify-content: center;
-    }
-
-    /* تنسيق الـ Badge */
-    .ratio-badge {
-        font-size: 0.85rem;
-        padding: 6px 12px;
-        border-radius: 50px;
-        font-weight: 700;
-        display: inline-flex;
         align-items: center;
     }
 
+    .ratio-badge {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 700;
+    }
+
     .bg-success-soft {
-        background-color: rgba(16, 185, 129, 0.1);
-        color: #10b981;
+        background-color: #dcfce7;
+        color: #15803d;
     }
 
     .bg-danger-soft {
-        background-color: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
+        background-color: #fee2e2;
+        color: #b91c1c;
     }
 
+    /* تحسين شكل العناوين */
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 1.5rem;
+    }
 </style>
 
 <div class="container-fluid py-4">
-    <div class="row g-4">
 
-        <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+    <h4 class="section-title">Overview Statistics</h4>
+
+    <!-- الصف الأول: الحجوزات، المستخدمين، الأرباح (3 أعمدة بدلاً من 4 لتوسيع المساحة) -->
+    <div class="row g-4 mb-5">
+
+        <!-- Bookings -->
+        <div class="col-xl-4 col-md-6">
             <div class="card stat-card shadow-sm">
                 <div class="card-body p-4">
-
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <p class="text-uppercase fw-bold text-muted mb-1" style="font-size: 0.7rem; letter-spacing: 1px;">
-                                Total Bookings
-                            </p>
+                            <p class="text-uppercase fw-bold text-muted mb-0 small">Total Bookings</p>
                             <h2 class="fw-black text-dark mb-0" id="totalBookingsCount">0</h2>
                         </div>
-                        <div class="icon-shape bg-primary text-white shadow-sm">
-                            <i class="bi bi-calendar-check"></i>
-                        </div>
+                        <div class="icon-shape bg-primary text-white"><i class="bi bi-calendar-check"></i></div>
                     </div>
-
-                    <div class="chart-container">
-                        <div id="totalBookingsRadialChart"></div>
+                    <div class="chart-container"><div id="totalBookingsRadialChart"></div></div>
+                    <div class="border-top pt-3 d-flex justify-content-between">
+                        <div id="bookingRatioSection"></div>
+                        <span class="text-muted small">vs last month</span>
                     </div>
-
-                    <div class="border-top pt-3 d-flex align-items-center justify-content-between">
-                        <div id="bookingRatioSection">
-                        </div>
-                        <span class="text-muted" style="font-size: 0.75rem;">Since last month</span>
-                    </div>
-
                 </div>
             </div>
         </div>
 
+        <!-- Users -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card stat-card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <p class="text-uppercase fw-bold text-muted mb-0 small">Total Users</p>
+                            <h2 class="fw-black text-dark mb-0" id="totalUsersCount">0</h2>
+                        </div>
+                        <div class="icon-shape bg-success text-white"><i class="bi bi-people"></i></div>
+                    </div>
+                    <div class="chart-container"><div id="totalUsersRadialChart"></div></div>
+                    <div class="border-top pt-3 d-flex justify-content-between">
+                        <div id="userRatioSection"></div>
+                        <span class="text-muted small">vs last month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue -->
+        <div class="col-xl-4 col-md-12">
+            <div class="card stat-card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <p class="text-uppercase fw-bold text-muted mb-0 small">Total Revenue</p>
+                            <h2 class="fw-black text-dark mb-0" id="totalRevenueCount">0</h2>
+                        </div>
+                        <div class="icon-shape bg-warning text-white"><i class="bi bi-currency-dollar"></i></div>
+                    </div>
+                    <div class="chart-container"><div id="totalRevenueRadialChart"></div></div>
+                    <div class="border-top pt-3 d-flex justify-content-between">
+                        <div id="revenueRatioSection"></div>
+                        <span class="text-muted small">vs last month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <h4 class="section-title">Demographics & Insights</h4>
+
+    <!-- الصف الثاني: تحليل توزيع العملاء والحجوزات -->
+    <div class="row g-4">
+
+        <!-- Pie Chart Card -->
+        <div class="col-xl-6 col-lg-12">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h6 class="fw-bold mb-1">Bookings Segmentation</h6>
+                            <small class="text-muted">New vs. Returning Customers</small>
+                        </div>
+                        <div class="dropdown">
+                            <i class="bi bi-three-dots-vertical cursor-pointer" data-bs-toggle="dropdown"></i>
+                            <ul class="dropdown-menu border-0 shadow">
+                                <li><a class="dropdown-item small" href="#">Download Report</a></li>
+                                <li><a class="dropdown-item small" href="#">View Details</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- حاوية الرسم البياني -->
+                    <div class="chart-container py-2">
+                        <div id="customerPieChart"></div>
+                    </div>
+
+                    <!-- مخلص أسفل الشارت لشكل أجمل -->
+                    <div class="d-flex justify-content-around mt-3 border-top pt-3">
+                        <div class="text-center">
+                            <span class="d-block small text-muted">New</span>
+                            <span class="fw-bold text-primary" id="newBookingVal">--</span>
+                        </div>
+                        <div class="vr text-light"></div>
+                        <div class="text-center">
+                            <span class="d-block small text-muted">Returning</span>
+                            <span class="fw-bold text-info" id="returnBookingVal">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- كارت إضافي (يمكنك وضع فيه جدول سريع لأحدث الحجوزات أو عرض مميز) -->
+        <div class="col-xl-6 col-lg-12">
+            <div class="card stat-card shadow-sm h-100 border-0" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+                <div class="card-body p-5 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="icon-box-lg bg-white bg-opacity-10 rounded-circle mb-4 p-4 text-white">
+                        <i class="bi bi-lightning-charge-fill fs-1 text-warning"></i>
+                    </div>
+                    <h3 class="fw-bold text-white mb-2">Smart Performance Insights</h3>
+                    <p class="text-white opacity-75 mb-4">Your returning customer rate has increased by 15% this week. Keep up the great service!</p>
+                    <button class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm">
+                        <i class="bi bi-file-earmark-bar-graph me-2"></i>Full Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -117,6 +212,9 @@
     <script>
         $(document).ready(function () {
             loadBookingDashboardData();
+            loadUserDashboardData();
+            loadRevenueDashboardData();
+            loadCustomerPieChart();
         });
 
         function loadBookingDashboardData() {
@@ -130,11 +228,11 @@
                     let ratioHtml = "";
                     if (data.hasRatioIncreases) {
                         ratioHtml = `<span class="ratio-badge bg-success-soft">
-                                        <i class="bi bi-arrow-up-short fs-5"></i> +${data.bookingsDifference}
+                                        <i class="bi bi-arrow-up-short fs-5"></i> +${data.difference}
                                      </span>`;
                     } else {
                         ratioHtml = `<span class="ratio-badge bg-danger-soft">
-                                        <i class="bi bi-arrow-down-short fs-5"></i> ${data.bookingsDifference}
+                                        <i class="bi bi-arrow-down-short fs-5"></i> ${data.difference}
                                      </span>`;
                     }
 
@@ -143,7 +241,68 @@
                 }
             });
         }
+                function loadUserDashboardData() {
+            $.ajax({
+                url: '@Url.Action("GetTotalRegisterUserData", "Dashboard")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
 
+                    $('#totalUsersCount').text(data.totalCount.toLocaleString());
+
+                    let ratioHtml = "";
+                    if (data.hasRatioIncreases) {
+                        ratioHtml = `<span class="ratio-badge bg-success-soft">
+                                        <i class="bi bi-arrow-up-short fs-5"></i> +${data.difference}
+                                     </span>`;
+                    } else {
+                        ratioHtml = `<span class="ratio-badge bg-danger-soft">
+                                        <i class="bi bi-arrow-down-short fs-5"></i> ${data.difference}
+                                     </span>`;
+                    }
+
+                    $('#userRatioSection').html(ratioHtml);
+
+                    renderUserRadialChart(data);
+                }
+            });
+        }
+                function loadRevenueDashboardData() {
+            $.ajax({
+                url: '@Url.Action("GetTotalRevenueData", "Dashboard")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+
+                    $('#totalRevenueCount').text(data.totalRevenue.toLocaleString());
+
+                    let ratioHtml = "";
+                    if (data.hasRatioIncreases) {
+                        ratioHtml = `<span class="ratio-badge bg-success-soft">
+                                        <i class="bi bi-arrow-up-short fs-5"></i> +${data.difference}
+                                     </span>`;
+                    } else {
+                        ratioHtml = `<span class="ratio-badge bg-danger-soft">
+                                        <i class="bi bi-arrow-down-short fs-5"></i> ${data.difference}
+                                     </span>`;
+                    }
+
+                    $('#revenueRatioSection').html(ratioHtml);
+
+                    renderRevenueRadialChart(data);
+                }
+            });
+        }
+                function loadCustomerPieChart() {
+            $.ajax({
+                url: '@Url.Action("GetCustomerBookingPieChart", "Dashboard")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    renderCustomerPieChart(data);
+                }
+            });
+        }
         function renderRadialChart(data) {
             var options = {
                 series: data.series,
@@ -163,7 +322,7 @@
                                 fontSize: '20px',
                                 fontWeight: '900',
                                 color: '#1e293b',
-                                formatter: function (val) { return val + "%"; }
+                                               formatter: function (val) {   return Math.round(data.series[0]) + "%";}
                             }
                         }
                     }
@@ -177,5 +336,154 @@
             var chart = new ApexCharts(document.querySelector("#totalBookingsRadialChart"), options);
             chart.render();
         }
+
+        function renderUserRadialChart(data) {
+            var options = {
+                series: data.series,
+                chart: {
+                    type: 'radialBar',
+                    height: 200,
+                    sparkline: { enabled: true }
+                },
+                plotOptions: {
+                    radialBar: {
+                        hollow: { size: '60%' },
+                        track: { background: '#f8fafc' },
+                        dataLabels: {
+                            name: { show: false },
+                            value: {
+                                offsetY: 8,
+                                fontSize: '20px',
+                                fontWeight: '900',
+                                color: '#1e293b',
+                                               formatter: function (val) {   return Math.round(data.series[0]) + "%";}
+                            }
+                        }
+                    }
+                },
+                fill: {
+                    colors: [data.hasRatioIncreases ? '#10b981' : '#ef4444']
+                },
+                stroke: { lineCap: 'round' }
+            };
+            var chart = new ApexCharts(document.querySelector("#totalUsersRadialChart"), options);
+            chart.render();
+        }
+
+        function renderRevenueRadialChart(data) {
+            var options = {
+                series: data.series,
+                chart: {
+                    type: 'radialBar',
+                    height: 200,
+                    sparkline: { enabled: true }
+                },
+                plotOptions: {
+                    radialBar: {
+                        hollow: { size: '60%' },
+                        track: { background: '#f8fafc' },
+                        dataLabels: {
+                            name: { show: false },
+                            value: {
+                                offsetY: 8,
+                                fontSize: '20px',
+                                fontWeight: '900',
+                                color: '#1e293b',
+                                               formatter: function (val) {   return Math.round(data.series[0]) + "%";}
+                            }
+                        }
+                    }
+                },
+                fill: {
+                    colors: [data.hasRatioIncreases ? '#10b981' : '#ef4444']
+                },
+                stroke: { lineCap: 'round' }
+            };
+            var chart = new ApexCharts(document.querySelector("#totalRevenueRadialChart"), options);
+            chart.render();
+        }
+
+                  function renderCustomerPieChart(data) {
+
+            // البيانات جاية من الـ API
+            var newBookings = data.series[0];
+            var returningBookings = data.series[1];
+
+            // تحديث النصوص (لو عندك UI elements)
+            $('#newBookingVal').text(newBookings + "%");
+            $('#returnBookingVal').text(returningBookings + "%");
+
+            var options = {
+                series: data.series,
+                chart: {
+                    type: 'donut',
+                    height: 320
+                },
+                labels: data.labels,
+                colors: ['#0d6efd', '#0dcaf0'],
+                legend: {
+                    position: 'bottom',
+                    fontFamily: 'Inter',
+                    fontWeight: 600
+                },
+                stroke: {
+                    show: false
+                },
+                dataLabels: {
+                    enabled: true,
+                    dropShadow: { enabled: false }
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '75%',
+                            labels: {
+                                show: true,
+                                name: { show: true },
+                                value: {
+                                    fontSize: '22px',
+                                    fontWeight: 'bold',
+                                    formatter: function (val) {
+                                        return val + "%";
+                                    }
+                                },
+                                total: {
+                                    show: true,
+                                    label: 'Total',
+                                    formatter: function () {
+                                        return "100%";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: { height: 300 },
+                        legend: { position: 'bottom' }
+                    }
+                }]
+            };
+
+            var chart = new ApexCharts(
+                document.querySelector("#customerPieChart"),
+                options
+            );
+
+            chart.render();
+        }
+
     </script>
 }
+
+@* @section Scripts {
+    <script src="~/js/Dashboard/loadBookingDashboardData.js"></script>
+    <script src="~/js/Dashboard/loadUserDashboardData.js"></script>
+    <script src="~/js/Dashboard/loadRevenueDashboardData.js"></script>
+
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/Dashboard/DashboardUI.css" />
+} *@

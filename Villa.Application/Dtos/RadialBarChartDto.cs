@@ -1,12 +1,12 @@
-﻿namespace Villla.Web.ViewModels
+﻿namespace Villla.Application.Dtos
 {
-    public class RadialBarChartVM
+    public class RadialBarChartDto
     {
-        public int TotalCount {  get; set; }
+        public decimal TotalCount {  get; set; }
         public decimal IncreaseDecreaseAmount { get; set; }
         public bool HasRatioIncreases { get; set; }
         public decimal[] Series { get; set; }
 
-        public int BookingsDifference { get; set; }
+        public decimal Difference { get; set; }
     }
 }

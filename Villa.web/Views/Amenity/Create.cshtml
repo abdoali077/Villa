@@ -1,4 +1,4 @@
-﻿@model AmenityVM
+﻿@model AmenityDto
 
 @using Microsoft.AspNetCore.Mvc.Rendering
 
@@ -32,29 +32,29 @@
                         <!-- Name -->
                         <div class="col-md-12">
                             <div class="form-floating">
-                                <input asp-for="Amenity.Name" class="form-control border-0 shadow-sm" placeholder="Amenity Name" />
-                                <label asp-for="Amenity.Name" class="ms-2">Amenity Name</label>
-                                <span asp-validation-for="Amenity.Name" class="text-danger small"></span>
+                                <input asp-for="Name" class="form-control border-0 shadow-sm" placeholder="Amenity Name" />
+                                <label asp-for="Name" class="ms-2">Amenity Name</label>
+                                <span asp-validation-for="Name" class="text-danger small"></span>
                             </div>
                         </div>
 
                         <!-- Description -->
                         <div class="col-12">
                             <div class="form-floating">
-                                <textarea asp-for="Amenity.Description"
+                                <textarea asp-for="Description"
                                           class="form-control border-0 shadow-sm"
                                           style="height: 100px"
                                           placeholder="Description"></textarea>
 
-                                <label asp-for="Amenity.Description" class="ms-2">Description</label>
-                                <span asp-validation-for="Amenity.Description" class="text-danger small"></span>
+                                <label asp-for="Description" class="ms-2">Description</label>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
                             </div>
                         </div>
 
                         <!-- Villa Dropdown -->
                         <div class="col-md-12">
                             <div class="form-floating">
-                                <select asp-for="Amenity.VillaId"
+                                <select asp-for="VillaId"
                                         class="form-select border-0 shadow-sm"
                                         asp-items="Model.VillaList ?? Enumerable.Empty<SelectListItem>()">
 
@@ -62,8 +62,8 @@
                                     <option disabled selected value="">-- Select Villa --</option>
                                 </select>
 
-                                <label asp-for="Amenity.VillaId" class="ms-2">Villa</label>
-                                <span asp-validation-for="Amenity.VillaId" class="text-danger small"></span>
+                                <label asp-for="VillaId" class="ms-2">Villa</label>
+                                <span asp-validation-for="VillaId" class="text-danger small"></span>
                             </div>
                         </div>
 

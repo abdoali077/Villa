@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Villla.Application.Interfaces.CommonRepos;
 using Villla.Application.Interfaces.Services;
+using Villla.Application.Services.Implementation;
+using Villla.Application.Services.Interface;
 using Villla.Domain.Entities;
 using Villla.Infrastructure.CommonImplementation.Services;
 using Villla.Infrastructure.Data;
@@ -39,6 +41,10 @@ namespace Villaa.web
 
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUnitOfWork, UniteOfWork>();
+            builder.Services.AddScoped<IDashboardService, DashboardService>();
+            builder.Services.AddScoped<IVillaService, VillaService>();
+            builder.Services.AddScoped<IAmenityService, AmenityService>();
+            builder.Services.AddScoped<IVillaNumberService, VillaNumberService>();
             //Stripe.StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
             Stripe.StripeConfiguration.ApiKey =Environment.GetEnvironmentVariable("STRIPE_SECRET");
             var app = builder.Build();

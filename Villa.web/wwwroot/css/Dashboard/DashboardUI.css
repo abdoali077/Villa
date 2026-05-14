@@ -1,4 +1,4 @@
-﻿:root {
+  :root {
         --card-bg: #ffffff;
         --text-main: #1e293b;
         --text-muted: #64748b;
@@ -13,7 +13,7 @@
         letter-spacing: -1.5px;
     }
 
-    /* تحسين الكارت ليكون متناسق */
+    /* ????? ?????? ????? ?????? */
     .stat-card {
         background: var(--card-bg);
         border: 1px solid rgba(0,0,0,0.05);
@@ -37,7 +37,7 @@
         font-size: 1.5rem;
     }
 
-    /* إصلاح مشكلة الـ Chart Container */
+    /* ????? ????? ??? Chart Container */
     .chart-container {
         position: relative;
         margin-top: -10px;
@@ -47,7 +47,7 @@
         justify-content: center;
     }
 
-    /* تنسيق الـ Badge */
+    /* ????? ??? Badge */
     .ratio-badge {
         font-size: 0.85rem;
         padding: 6px 12px;
