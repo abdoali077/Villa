@@ -9,14 +9,18 @@ using Villla.Infrastructure.Data;
 
 namespace Villla.Infrastructure.RepositoryImplementation
 {
-    public class VillaNumberRepository : GenericRepository<VillaNumber>, IVillaNumberRepository
+     public class VillaNumberRepository 
+        : GenericRepository<VillaNumber>, IVillaNumberRepository
     {
         public VillaNumberRepository(ApplicationDbContext db) : base(db)
         {
         }
-        public void UpdateVillaNumber(VillaNumber entity)
+
+        // ================= UPDATE =================
+        public Task UpdateVillaNumberAsync(VillaNumber entity)
         {
             _db.VillaNumbers.Update(entity);
+            return Task.CompletedTask; // EF tracking already handles it
         }
     }
 }

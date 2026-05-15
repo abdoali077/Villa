@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Villla.Application.Dtos;
-using Villla.Application.Interfaces.Services;
 using Villla.Application.Services.Interface;
 
 namespace Villla.Web.Controllers

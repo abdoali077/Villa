@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Villla.Application.Interfaces.CommonRepos;
-using Villla.Application.Interfaces.Services;
 using Villla.Application.Services.Implementation;
 using Villla.Application.Services.Interface;
 using Villla.Infrastructure.CommonImplementation.Services;

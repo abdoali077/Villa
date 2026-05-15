@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using Villla.Application.Application.Extension;
 using Villla.Application.Interfaces.CommonRepos;
-using Villla.Application.Interfaces.Services;
 using Villla.Application.Services.Implementation;
 using Villla.Application.Services.Interface;
 using Villla.Application.Settings;
@@ -18,6 +18,19 @@ namespace Villaa.web
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // ?? 2. override connection string ?? Serilog
+            var connectionString = Environment.GetEnvironmentVariable("DEFAULT_CONNECTION");
+            builder.Configuration["Serilog:WriteTo:2:Args:connectionString"] = connectionString;
+
+            // ?? 3. Configure Serilog
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .Enrich.FromLogContext()
+                .CreateLogger();
+
+            // ?? 4. Replace default logging
+            builder.Host.UseSerilog();
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();

@@ -13,9 +13,13 @@ namespace Villla.Infrastructure.RepositoryImplementation
     public class AmenityRepository : GenericRepository<Amenity>, IAmenityRepository
     {
         public AmenityRepository(ApplicationDbContext db) : base(db) { }
-        public void UpdateAmenity(Amenity entity)
+        public async Task UpdateAmenityAsync(Amenity entity)
         {
             _db.Amenities.Update(entity);
+                
+            await Task.CompletedTask;
+
+
         }
     }
 }

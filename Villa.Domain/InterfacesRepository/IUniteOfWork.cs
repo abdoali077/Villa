@@ -13,6 +13,6 @@ namespace Villla.Application.Interfaces.CommonRepos
         IAmenityRepository Amenities { get; }
         IBookingRepository Bookings { get; }
         IApplicationUserRepository ApplicationUsers { get; }
-        void Save();
+        Task SaveAsync();
     }
 }

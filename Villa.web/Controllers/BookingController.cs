@@ -25,7 +25,7 @@ namespace Villla.Web.Controllers
             return View();
         }
         [Authorize]
-        public IActionResult FinalizeBooking(int villaId, DateTime checkInDate, int nights)
+        public async Task<IActionResult> FinalizeBooking(int villaId, DateTime checkInDate, int nights)
         {
             var claimIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -33,24 +33,24 @@ namespace Villla.Web.Controllers
             if (string.IsNullOrEmpty(userId))
                 return RedirectToAction("Login", "Account");
 
-            var user = _uow.ApplicationUsers.Get(u => u.Id == userId);
+            var user = await _uow.ApplicationUsers.GetAsync(u => u.Id == userId);
 
             if (user == null)
                 return Unauthorized();
 
-            var villa = _uow.Villas.Get(
+            var villa = await _uow.Villas.GetAsync(
                 v => v.Id == villaId,
                 include: v => v.Include(q => q.Amenities));
 
             if (villa == null)
                 return NotFound();
             // 🔥 Availability Check (IMPORTANT)
-            var villaNumbers = _uow.VillaNumbers.GetAll().ToList();
+            var villaNumbers = (await _uow.VillaNumbers.GetAllAsync()).ToList();
 
-            var bookings = _uow.Bookings.GetAll(
+            var bookings = (await _uow.Bookings.GetAllAsync(
                 b => b.Status == BookingStatus.Approved ||
                      b.Status == BookingStatus.CheckIn
-            ).ToList();
+            )).ToList();
 
             int availableRooms = BookingAvailabilityHelper.GetAvailableRoomsCount(
                 villa,
@@ -90,21 +90,21 @@ namespace Villla.Web.Controllers
         }
         [Authorize]
         [HttpPost]
-        public IActionResult FinalizeBooking(FinalizeBookingVM bookingVM)
+        public async Task<IActionResult> FinalizeBooking(FinalizeBookingVM bookingVM)
         {
-            var villa = _uow.Villas.Get(v => v.Id == bookingVM.VillaId);
+            var villa = await _uow.Villas.GetAsync(v => v.Id == bookingVM.VillaId);
 
             if (villa == null)
                 return NotFound();
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             // 🔥 Availability Check AGAIN (VERY IMPORTANT)
-            var villaNumbers = _uow.VillaNumbers.GetAll().ToList();
+            var villaNumbers = (await _uow.VillaNumbers.GetAllAsync()).ToList();
 
-            var bookings = _uow.Bookings.GetAll(
+            var bookings = (await _uow.Bookings.GetAllAsync(
                 b => b.Status == BookingStatus.Approved ||
                      b.Status == BookingStatus.CheckIn
-            ).ToList();
+            )).ToList();
 
             int availableRooms = BookingAvailabilityHelper.GetAvailableRoomsCount(
                 villa,
@@ -141,8 +141,8 @@ namespace Villla.Web.Controllers
                 )
             };
 
-            _uow.Bookings.Create(booking);
-            _uow.Save();
+            await _uow.Bookings.CreateAsync(booking);
+            await _uow.SaveAsync();
 
             var domain = Request.Scheme + "://" + Request.Host.Value + "/";
 
@@ -180,7 +180,7 @@ namespace Villla.Web.Controllers
             var service = new Stripe.Checkout.SessionService();
             Stripe.Checkout.Session session = service.Create(options);
             _uow.Bookings.UpdateStripePaymentId(booking.Id, session.Id, session.PaymentIntentId);
-            _uow.Save();
+            await _uow.SaveAsync();
 
             Response.Headers.Add("Location", session.Url);
 
@@ -188,9 +188,9 @@ namespace Villla.Web.Controllers
         }
 
         [Authorize]
-        public IActionResult BookingConfirmation(int bookingId)
+        public async Task<IActionResult> BookingConfirmation(int bookingId)
         {
-            var booking = _uow.Bookings.Get(b => b.Id == bookingId);
+            var booking = await _uow.Bookings.GetAsync(b => b.Id == bookingId);
 
             if (booking == null)
                 return NotFound();
@@ -215,10 +215,10 @@ namespace Villla.Web.Controllers
                         BookingStatus.Approved, 0
                     );
 
-                    _uow.Save();
+                    await _uow.SaveAsync();
 
                     // إعادة تحميل البيانات بعد التحديث
-                    booking = _uow.Bookings.Get(b => b.Id == bookingId);
+                    booking = await _uow.Bookings.GetAsync(b => b.Id == bookingId);
                 }
             }
 
@@ -227,12 +227,12 @@ namespace Villla.Web.Controllers
 
         [Authorize]
         [HttpGet]
-        public IActionResult GetAll(string status)
+        public async Task<IActionResult> GetAll(string status)
         {
             IEnumerable<BookingVM> bookings;
             if (User.IsInRole(SD.Role_Admin))
             {
-                bookings = _uow.Bookings.GetAll(include: b => b.Include(q => q.Villa).Include(q => q.User))
+                bookings = (await _uow.Bookings.GetAllAsync(include: b => b.Include(q => q.Villa).Include(q => q.User)))
                     .Select(b => new BookingVM
                     {
                         BookingId = b.Id,
@@ -250,7 +250,7 @@ namespace Villla.Web.Controllers
             {
                 var claimIdentity = (ClaimsIdentity)User.Identity;
                 var userId = claimIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                bookings = _uow.Bookings.GetAll(b => b.UserId == userId, include: b => b.Include(q => q.Villa))
+                bookings = (await _uow.Bookings.GetAllAsync(b => b.UserId == userId, include: b => b.Include(q => q.Villa)))
                     .Select(b => new BookingVM
                     {
                         BookingId = b.Id,
@@ -271,11 +271,11 @@ namespace Villla.Web.Controllers
         }
 
         [Authorize]
-        public IActionResult BookingDetails(int bookingId)
+        public async Task<IActionResult> BookingDetails(int bookingId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var bookingQuery = _uow.Bookings.GetAll(
+            var bookingQuery = await _uow.Bookings.GetAllAsync(
                 b => b.Id == bookingId,
                 include: b => b.Include(q => q.Villa)
             );
@@ -321,14 +321,13 @@ namespace Villla.Web.Controllers
                 // Only when allowed to assign villa number
                 if (booking.Status == BookingStatus.Approved)
                 {
-                    var availableVillaNumber = AssignAvailableVillaNumbersByVilla(booking.VillaId);
+                    var availableVillaNumber = await AssignAvailableVillaNumbersByVilla(booking.VillaId);
 
-                    adminVM.VillaNumbers = _uow.VillaNumbers
-                        .GetAll(vn =>
+                    adminVM.VillaNumbers = (await _uow.VillaNumbers.GetAllAsync(vn =>
                             vn.VillaId == booking.VillaId &&
                             availableVillaNumber.Contains(vn.Villa_Number) &&
                             vn.Villa_Number > 0
-                        )
+                        ))  
                         .ToList();
                 }
 
@@ -363,17 +362,15 @@ namespace Villla.Web.Controllers
             return View("BookingDetails", userVM);
         }
 
-        private List<int> AssignAvailableVillaNumbersByVilla(int villaId)
+        private async Task<List<int>> AssignAvailableVillaNumbersByVilla(int villaId)
         {
-            var villaNumbers = _uow.VillaNumbers
-                .GetAll(vn => vn.VillaId == villaId)
+            var villaNumbers = (await _uow.VillaNumbers.GetAllAsync(vn => vn.VillaId == villaId))
                 .Where(vn => vn.Villa_Number > 0) // 🔥 prevent 0
                 .ToList();
 
-            var bookedNumbers = _uow.Bookings
-                .GetAll(b =>
+            var bookedNumbers = (await _uow.Bookings.GetAllAsync(b =>
                     b.VillaId == villaId &&
-                    (b.Status == BookingStatus.Approved || b.Status == BookingStatus.CheckIn))
+                    (b.Status == BookingStatus.Approved || b.Status == BookingStatus.CheckIn)))
                 .Select(b => b.VillaNumber)
                 .Where(x => x > 0) // 🔥 important
                 .ToList();
@@ -386,9 +383,9 @@ namespace Villla.Web.Controllers
 
         [Authorize(Roles = SD.Role_Admin)]
         [HttpPost]
-        public IActionResult CheckIn(BookingDetailsVM vm)
+        public async Task<IActionResult> CheckIn(BookingDetailsVM vm)
         {
-            var booking = _uow.Bookings.Get(b => b.Id == vm.bookingId);
+            var booking = await _uow.Bookings.GetAsync(b => b.Id == vm.bookingId);
 
             if (booking == null)
                 return NotFound();
@@ -404,33 +401,57 @@ namespace Villla.Web.Controllers
 
             int villaNumber = vm.VillaNumber.Value;
 
-            var isTaken = _uow.Bookings.GetAll(b =>
+            var isTaken = (await _uow.Bookings.GetAllAsync(b =>
                     b.VillaId == booking.VillaId &&
                     b.VillaNumber == villaNumber &&
-                    (b.Status == BookingStatus.CheckIn || b.Status == BookingStatus.Approved))
+                    (b.Status == BookingStatus.CheckIn || b.Status == BookingStatus.Approved))) 
                 .Any();
 
             if (isTaken)
                 return BadRequest("Villa number already occupied");
 
-            var available = AssignAvailableVillaNumbersByVilla(booking.VillaId);
+            var available = await AssignAvailableVillaNumbersByVilla(booking.VillaId);
 
             if (!available.Contains(villaNumber))
                 return BadRequest("Villa number no longer available");
 
             _uow.Bookings.UpdateStatus(booking.Id, BookingStatus.CheckIn, villaNumber);
 
-            _uow.Save();
+            await _uow.SaveAsync();
             TempData["success"] = "Checked in successfully";
 
             return RedirectToAction("BookingDetails", new { bookingId = booking.Id });
         }
 
+        //[Authorize(Roles = SD.Role_Admin)]
+        //[HttpPost]
+        //public async Task<IActionResult> CheckOut(BookingDetailsVM vm)
+        //{
+        //    var booking = await _uow.Bookings.GetAsync(b => b.Id == vm.bookingId);
+
+        //    if (booking == null)
+        //        return NotFound();
+
+        //    if (booking.Status != BookingStatus.CheckIn)
+        //        return BadRequest("Booking is not in CheckIn state");
+
+        //    if (!vm.VillaNumber.HasValue)
+        //        return BadRequest("Villa number is required");
+
+        //    int villaNumber = vm.VillaNumber.Value;
+
+        //    _uow.Bookings.UpdateStatus(booking.Id, BookingStatus.Completed, villaNumber);
+        //    await _uow.SaveAsync();
+        //    TempData["success"] = "Checked out successfully";
+
+        //    return RedirectToAction("BookingDetails", new { bookingId = booking.Id });
+        //}
+
         [Authorize(Roles = SD.Role_Admin)]
         [HttpPost]
-        public IActionResult CheckOut(BookingDetailsVM vm)
+        public async Task<IActionResult> CheckOut(BookingDetailsVM vm)
         {
-            var booking = _uow.Bookings.Get(b => b.Id == vm.bookingId);
+            var booking = await _uow.Bookings.GetAsync(b => b.Id == vm.bookingId);
 
             if (booking == null)
                 return NotFound();
@@ -438,22 +459,25 @@ namespace Villla.Web.Controllers
             if (booking.Status != BookingStatus.CheckIn)
                 return BadRequest("Booking is not in CheckIn state");
 
-            if (!vm.VillaNumber.HasValue)
-                return BadRequest("Villa number is required");
+            var villaNumber = booking.VillaNumber;
 
-            int villaNumber = vm.VillaNumber.Value;
+            if (villaNumber == null || villaNumber == 0)
+                return BadRequest("Villa number is missing");
 
             _uow.Bookings.UpdateStatus(booking.Id, BookingStatus.Completed, villaNumber);
-            _uow.Save();
+
+            await _uow.SaveAsync();
+
             TempData["success"] = "Checked out successfully";
 
             return RedirectToAction("BookingDetails", new { bookingId = booking.Id });
         }
+
         [Authorize(Roles = SD.Role_Admin)]
         [HttpPost]
-        public IActionResult CancelBooking(int bookingId)
+        public async Task<IActionResult> CancelBooking(int bookingId)
         {
-            var booking = _uow.Bookings.Get(b => b.Id == bookingId);
+            var booking = await _uow.Bookings.GetAsync(b => b.Id == bookingId);
             if (booking == null)
                 return NotFound();
             if (booking.Status == BookingStatus.Cancelled)
@@ -464,7 +488,7 @@ namespace Villla.Web.Controllers
             if (booking.Status == BookingStatus.Completed)
                 return BadRequest("Cannot cancel a completed booking");
             _uow.Bookings.UpdateStatus(booking.Id, BookingStatus.Cancelled, null);
-            _uow.Save();
+            await _uow.SaveAsync();
             TempData["success"] = "Booking cancelled successfully";
             return RedirectToAction("BookingDetails", new { bookingId = booking.Id });
         }

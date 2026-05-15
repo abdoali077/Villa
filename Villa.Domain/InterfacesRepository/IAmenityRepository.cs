@@ -10,6 +10,6 @@ namespace Villla.Application.Interfaces.CommonRepos
 {
     public interface IAmenityRepository : IRepository<Amenity>
     {
-       void UpdateAmenity(Amenity entity);
+       Task UpdateAmenityAsync(Amenity entity);
     }
 }

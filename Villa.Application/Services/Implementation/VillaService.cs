@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Villla.Application.Dtos;
 using Villla.Application.Interfaces.CommonRepos;
 using Villla.Application.Services.Interface;
@@ -12,202 +13,278 @@ namespace Villla.Application.Services.Implementation
     {
         private readonly IUnitOfWork _uow;
         private readonly IWebHostEnvironment _env;
+        private readonly ILogger<VillaService> _logger;
 
-        public VillaService(IUnitOfWork uow, IWebHostEnvironment env)
+        public VillaService(IUnitOfWork uow, IWebHostEnvironment env, ILogger<VillaService> logger)
         {
             _uow = uow;
             _env = env;
+            _logger = logger;
         }
 
         // ================= GET ALL =================
-        public Task<IEnumerable<VillaDto>> GetAllAsync()
+        public async Task<IEnumerable<VillaDto>> GetAllAsync()
         {
-            var villas = _uow.Villas.GetAll();
-
-            var result = villas.Select(v => new VillaDto
+            try
             {
-                Id = v.Id,
-                Name = v.Name,
-                Description = v.Description,
-                Price = v.Price,
-                Sqft = v.Sqft,
-                Occupancy = v.Occupancy,
-                ImageUrl = v.ImageUrl
-            });
+                _logger.LogInformation("GetAll Villas started | Thread: {ThreadId}", Environment.CurrentManagedThreadId);
 
-            return Task.FromResult(result);
+                var villas = await _uow.Villas.GetAllAsync();
+
+                var result = villas.Select(v => new VillaDto
+                {
+                    Id = v.Id,
+                    Name = v.Name,
+                    Description = v.Description,
+                    Price = v.Price,
+                    Sqft = v.Sqft,
+                    Occupancy = v.Occupancy,
+                    ImageUrl = v.ImageUrl
+                });
+
+                _logger.LogInformation("GetAll Villas completed | Count: {Count}", result.Count());
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetAll Villas");
+                throw;
+            }
         }
 
         // ================= GET BY ID =================
-        public Task<VillaDto?> GetByIdAsync(int id)
+        public async Task<VillaDto?> GetByIdAsync(int id)
         {
-            var villa = _uow.Villas.Get(
-                v => v.Id == id,
-                include: q => q.Include(x => x.Amenities)
-            );
-
-            if (villa == null)
-                return Task.FromResult<VillaDto?>(null);
-
-            var dto = new VillaDto
+            try
             {
-                Id = villa.Id,
-                Name = villa.Name,
-                Description = villa.Description,
-                Price = villa.Price,
-                Sqft = villa.Sqft,
-                Occupancy = villa.Occupancy,
-                ImageUrl = villa.ImageUrl,
+                _logger.LogInformation("GetVillaById started | VillaId: {VillaId}", id);
 
-                Amenities = villa.Amenities?
-                    .Select(a => new AmenityDto
-                    {
-                        Id = a.Id,
-                        Name = a.Name
-                    }).ToList()
-            };
+                var villa = await _uow.Villas.GetAsync(
+                    v => v.Id == id,
+                    include: q => q.Include(x => x.Amenities)
+                );
 
-            return Task.FromResult<VillaDto?>(dto);
+                if (villa == null)
+                {
+                    _logger.LogWarning("Villa not found | VillaId: {VillaId}", id);
+                    return null;
+                }
+
+                var dto = new VillaDto
+                {
+                    Id = villa.Id,
+                    Name = villa.Name,
+                    Description = villa.Description,
+                    Price = villa.Price,
+                    Sqft = villa.Sqft,
+                    Occupancy = villa.Occupancy,
+                    ImageUrl = villa.ImageUrl,
+                    Amenities = villa.Amenities?
+                        .Select(a => new AmenityDto
+                        {
+                            Id = a.Id,
+                            Name = a.Name
+                        }).ToList()
+                };
+
+                _logger.LogInformation("GetVillaById success | VillaId: {VillaId}", id);
+
+                return dto;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetVillaById | VillaId: {VillaId}", id);
+                throw;
+            }
         }
 
         // ================= CREATE =================
-        public Task CreateAsync(VillaDto dto)
+        public async Task CreateAsync(VillaDto dto)
         {
-            var villa = new Villa
+            try
             {
-                Name = dto.Name,
-                Description = dto.Description,
-                Price = dto.Price,
-                Sqft = dto.Sqft,
-                Occupancy = dto.Occupancy
-            };
+                _logger.LogInformation("Create Villa started | Name: {Name}", dto.Name);
 
-            // Image upload
-            villa.ImageUrl = dto.Image != null
-                ? SaveImage(dto.Image)
-                : "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267";
+                var villa = new Villa
+                {
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    Price = dto.Price,
+                    Sqft = dto.Sqft,
+                    Occupancy = dto.Occupancy
+                };
 
-            // Amenities (IMPORTANT FIX)
-            if (dto.SelectedAmenities != null && dto.SelectedAmenities.Any())
-            {
-                villa.Amenities = dto.SelectedAmenities
-                     .Select(id =>
-                     {
-                         var amenity = _uow.Amenities.Get(a => a.Id == id);
+                villa.ImageUrl = dto.Image != null
+                    ? SaveImage(dto.Image)
+                    : "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267";
 
-                         return new Amenity
-                         {
-                             Id = amenity.Id,
-                             Name = amenity.Name
-                         };
-                     })
-                     .ToList();
+                if (dto.SelectedAmenities != null && dto.SelectedAmenities.Any())
+                {
+                    var amenities = await Task.WhenAll(
+                        dto.SelectedAmenities.Select(id =>
+                            _uow.Amenities.GetAsync(a => a.Id == id))
+                    );
+
+                    villa.Amenities = amenities
+                        .Where(a => a != null)
+                        .ToList()!;
+                }
+
+                await _uow.Villas.CreateAsync(villa);
+                await _uow.SaveAsync();
+
+                _logger.LogInformation("Villa created successfully | Name: {Name}", dto.Name);
             }
-
-            _uow.Villas.Create(villa);
-            _uow.Save();
-
-            return Task.CompletedTask;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating villa | Name: {Name}", dto.Name);
+                throw;
+            }
         }
 
         // ================= UPDATE =================
-        public Task UpdateAsync(VillaDto dto)
+        public async Task UpdateAsync(VillaDto dto)
         {
-            var villa = _uow.Villas.Get(
-                v => v.Id == dto.Id,
-                include: q => q.Include(x => x.Amenities)
-            );
-
-            if (villa == null)
-                return Task.CompletedTask;
-
-            villa.Name = dto.Name;
-            villa.Description = dto.Description;
-            villa.Price = dto.Price;
-            villa.Sqft = dto.Sqft;
-            villa.Occupancy = dto.Occupancy;
-
-            // Image update
-            if (dto.Image != null)
+            try
             {
-                DeleteImage(villa.ImageUrl);
-                villa.ImageUrl = SaveImage(dto.Image);
+                _logger.LogInformation("Update Villa started | Id: {Id}", dto.Id);
+
+                var villa = await _uow.Villas.GetAsync(
+                    v => v.Id == dto.Id,
+                    include: q => q.Include(x => x.Amenities)
+                );
+
+                if (villa == null)
+                {
+                    _logger.LogWarning("Villa not found for update | Id: {Id}", dto.Id);
+                    return;
+                }
+
+                villa.Name = dto.Name;
+                villa.Description = dto.Description;
+                villa.Price = dto.Price;
+                villa.Sqft = dto.Sqft;
+                villa.Occupancy = dto.Occupancy;
+
+                if (dto.Image != null)
+                {
+                    DeleteImage(villa.ImageUrl);
+                    villa.ImageUrl = SaveImage(dto.Image);
+                }
+
+                villa.Amenities?.Clear();
+
+                if (dto.SelectedAmenities != null && dto.SelectedAmenities.Any())
+                {
+                    var amenities = await Task.WhenAll(
+                        dto.SelectedAmenities.Select(id =>
+                            _uow.Amenities.GetAsync(a => a.Id == id))
+                    );
+
+                    villa.Amenities = amenities
+                        .Where(a => a != null)
+                        .ToList()!;
+                }
+
+                await _uow.Villas.UpdateVillaAsync(villa);
+                await _uow.SaveAsync();
+
+                _logger.LogInformation("Villa updated successfully | Id: {Id}", dto.Id);
             }
-
-            // Amenities update (IMPORTANT FIX)
-            villa.Amenities?.Clear();
-
-            if (dto.SelectedAmenities != null)
+            catch (Exception ex)
             {
-                villa.Amenities = dto.SelectedAmenities
-                     .Select(id =>
-                     {
-                         var amenity = _uow.Amenities.Get(a => a.Id == id);
-
-                         return new Amenity
-                         {
-                             Id = amenity.Id,
-                             Name = amenity.Name
-                         };
-                     })
-                     .ToList();
+                _logger.LogError(ex, "Error updating villa | Id: {Id}", dto.Id);
+                throw;
             }
-
-            _uow.Villas.UpdateVilla(villa);
-            _uow.Save();
-
-            return Task.CompletedTask;
         }
 
         // ================= DELETE =================
-        public Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-            var villa = _uow.Villas.Get(v => v.Id == id);
+            try
+            {
+                _logger.LogInformation("Delete Villa started | Id: {Id}", id);
 
-            if (villa == null)
-                return Task.CompletedTask;
+                var villa = await _uow.Villas.GetAsync(v => v.Id == id);
 
-            DeleteImage(villa.ImageUrl);
+                if (villa == null)
+                {
+                    _logger.LogWarning("Villa not found for delete | Id: {Id}", id);
+                    return;
+                }
 
-            _uow.Villas.Delete(villa);
-            _uow.Save();
+                DeleteImage(villa.ImageUrl);
 
-            return Task.CompletedTask;
+                _uow.Villas.Delete(villa);
+                await _uow.SaveAsync();
+
+                _logger.LogInformation("Villa deleted successfully | Id: {Id}", id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting villa | Id: {Id}", id);
+                throw;
+            }
         }
 
-        // ================= HELPERS =================
+        // ================= SAVE IMAGE =================
         private string SaveImage(IFormFile file)
         {
-            string wwwRootPath = _env.WebRootPath;
-
-            string fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-
-            string folderPath = Path.Combine(wwwRootPath, "images", "VillaImage");
-
-            if (!Directory.Exists(folderPath))
-                Directory.CreateDirectory(folderPath);
-
-            string filePath = Path.Combine(folderPath, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                file.CopyTo(stream);
-            }
+                _logger.LogInformation("Saving image | File: {FileName}", file.FileName);
 
-            return "/images/VillaImage/" + fileName;
+                string wwwRootPath = _env.WebRootPath;
+                string fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                string folderPath = Path.Combine(wwwRootPath, "images", "VillaImage");
+
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                string filePath = Path.Combine(folderPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                }
+
+                var path = "/images/VillaImage/" + fileName;
+
+                _logger.LogInformation("Image saved successfully | Path: {Path}", path);
+
+                return path;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving image");
+                throw;
+            }
         }
 
+        // ================= DELETE IMAGE =================
         private void DeleteImage(string imageUrl)
         {
-            if (string.IsNullOrEmpty(imageUrl))
-                return;
+            try
+            {
+                if (string.IsNullOrEmpty(imageUrl))
+                    return;
 
-            var relativePath = imageUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
+                var relativePath = imageUrl.TrimStart('/')
+                    .Replace("/", Path.DirectorySeparatorChar.ToString());
 
-            var path = Path.Combine(_env.WebRootPath, relativePath);
+                var path = Path.Combine(_env.WebRootPath, relativePath);
 
-            if (File.Exists(path))
-                File.Delete(path);
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                    _logger.LogInformation("Image deleted | Path: {Path}", path);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting image | Url: {ImageUrl}", imageUrl);
+            }
         }
     }
 }

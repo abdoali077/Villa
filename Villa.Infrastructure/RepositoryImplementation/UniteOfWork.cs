@@ -25,9 +25,9 @@ namespace Villla.Infrastructure.RepositoryImplementation
             Bookings = new BookingRepository(_db);
             ApplicationUsers = new ApplicationUserRepository(_db);
         }
-        public void Save()
+        public async Task SaveAsync()
         {
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
     }

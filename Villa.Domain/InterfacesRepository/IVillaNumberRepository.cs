@@ -10,7 +10,6 @@ namespace Villla.Application.Interfaces.CommonRepos
 {
     public interface IVillaNumberRepository: IRepository<VillaNumber>
     {
-        void UpdateVillaNumber(VillaNumber entity);
-
+        Task UpdateVillaNumberAsync(VillaNumber entity);
     }
 }

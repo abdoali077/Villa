@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Villla.Application.Dtos;
 using Villla.Application.Interfaces.CommonRepos;
 using Villla.Application.Services.Interface;
@@ -15,103 +11,212 @@ namespace Villla.Application.Services.Implementation
     public class VillaNumberService : IVillaNumberService
     {
         private readonly IUnitOfWork _uow;
-        public VillaNumberService(IUnitOfWork uow)
+        private readonly ILogger<VillaNumberService> _logger;
+
+        public VillaNumberService(IUnitOfWork uow, ILogger<VillaNumberService> logger)
         {
             _uow = uow;
+            _logger = logger;
         }
 
+        // ================= CREATE =================
         public async Task<bool> CreateAsync(VillaNumberDto dto)
         {
-            bool exists = _uow.VillaNumbers.GetAll()
-                .Any(v => v.Villa_Number == dto.VillaNumber);
-
-            if (exists) return false;
-
-            var entity = new VillaNumber
+            try
             {
-                Villa_Number = dto.VillaNumber,
-                VillaId = dto.VillaId,
-                SpecialDetails = dto.SpecialDetails
-            };
+                _logger.LogInformation("Create VillaNumber started | VillaNumber: {VillaNumber}", dto.VillaNumber);
 
-            _uow.VillaNumbers.Create(entity);
-            _uow.Save();
+                var exists = (await _uow.VillaNumbers.GetAllAsync())
+                    .Any(v => v.Villa_Number == dto.VillaNumber);
 
-            return true;
+                if (exists)
+                {
+                    _logger.LogWarning("VillaNumber already exists | VillaNumber: {VillaNumber}", dto.VillaNumber);
+                    return false;
+                }
+
+                var entity = new VillaNumber
+                {
+                    Villa_Number = dto.VillaNumber,
+                    VillaId = dto.VillaId,
+                    SpecialDetails = dto.SpecialDetails
+                };
+
+                await _uow.VillaNumbers.CreateAsync(entity);
+                await _uow.SaveAsync();
+
+                _logger.LogInformation("VillaNumber created successfully | VillaNumber: {VillaNumber}", dto.VillaNumber);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating VillaNumber | VillaNumber: {VillaNumber}", dto.VillaNumber);
+                throw;
+            }
         }
 
+        // ================= DELETE =================
         public async Task DeleteAsync(int id)
         {
-            var entity = _uow.VillaNumbers.Get(v => v.Villa_Number == id);
-            if (entity == null) return;
-            _uow.VillaNumbers.Delete(entity);
-            _uow.Save();
+            try
+            {
+                _logger.LogInformation("Delete VillaNumber started | VillaNumber: {VillaNumber}", id);
 
+                var entity = await _uow.VillaNumbers.GetAsync(v => v.Villa_Number == id);
+
+                if (entity == null)
+                {
+                    _logger.LogWarning("VillaNumber not found for delete | VillaNumber: {VillaNumber}", id);
+                    return;
+                }
+
+                _uow.VillaNumbers.Delete(entity);
+                await _uow.SaveAsync();
+
+                _logger.LogInformation("VillaNumber deleted successfully | VillaNumber: {VillaNumber}", id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting VillaNumber | VillaNumber: {VillaNumber}", id);
+                throw;
+            }
         }
 
+        // ================= GET ALL =================
         public async Task<IEnumerable<VillaNumberDto>> GetAllAsync()
         {
-            var data = _uow.VillaNumbers.GetAll(include: q => q.Include(x => x.Villa));
-            var model = data.Select(x => new VillaNumberDto
+            try
             {
-                VillaNumber = x.Villa_Number,
-                VillaId = x.VillaId,
-                VillaName = x.Villa != null ? x.Villa.Name : "",
-                SpecialDetails = x.SpecialDetails,
-                VillaList = _uow.Villas.GetAll().Select(v => new SelectListItem
+                _logger.LogInformation("GetAll VillaNumbers started");
+
+                var villaNumbers = await _uow.VillaNumbers
+                    .GetAllAsync(include: q => q.Include(x => x.Villa));
+
+                var villas = await _uow.Villas.GetAllAsync();
+
+                var villaList = villas.Select(v => new SelectListItem
                 {
                     Text = v.Name,
                     Value = v.Id.ToString()
-                }).ToList()
-            });
-            
-            return model;
+                }).ToList();
+
+                var result = villaNumbers.Select(x => new VillaNumberDto
+                {
+                    VillaNumber = x.Villa_Number,
+                    VillaId = x.VillaId,
+                    VillaName = x.Villa?.Name ?? "",
+                    SpecialDetails = x.SpecialDetails,
+                    VillaList = villaList
+                });
+
+                _logger.LogInformation("GetAll VillaNumbers completed | Count: {Count}", result.Count());
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all VillaNumbers");
+                throw;
+            }
         }
 
+        // ================= GET BY ID =================
         public async Task<VillaNumberDto?> GetByIdAsync(int id)
         {
-            var data = _uow.VillaNumbers.Get(
-                x => x.Villa_Number == id,
-                include: q => q.Include(x => x.Villa)
-            );
-            if (data == null)
-                return null;
-            var model = new VillaNumberDto
+            try
             {
-                VillaNumber = data.Villa_Number,
-                VillaId = data.VillaId,
-                VillaName = data.Villa != null ? data.Villa.Name : "",
-                SpecialDetails = data.SpecialDetails,
-                VillaList = _uow.Villas.GetAll().Select(v => new SelectListItem
+                _logger.LogInformation("Get VillaNumber by ID started | VillaNumber: {VillaNumber}", id);
+
+                var data = await _uow.VillaNumbers.GetAsync(
+                    x => x.Villa_Number == id,
+                    include: q => q.Include(x => x.Villa)
+                );
+
+                if (data == null)
+                {
+                    _logger.LogWarning("VillaNumber not found | VillaNumber: {VillaNumber}", id);
+                    return null;
+                }
+
+                var model = new VillaNumberDto
+                {
+                    VillaNumber = data.Villa_Number,
+                    VillaId = data.VillaId,
+                    VillaName = data.Villa?.Name ?? "",
+                    SpecialDetails = data.SpecialDetails,
+                    VillaList = (await _uow.Villas.GetAllAsync())
+                        .Select(v => new SelectListItem
+                        {
+                            Text = v.Name,
+                            Value = v.Id.ToString()
+                        }).ToList()
+                };
+
+                _logger.LogInformation("Get VillaNumber by ID success | VillaNumber: {VillaNumber}", id);
+
+                return model;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting VillaNumber by ID | VillaNumber: {VillaNumber}", id);
+                throw;
+            }
+        }
+
+        // ================= VILLA LIST =================
+        public async Task<IEnumerable<SelectListItem>> GetVillaListAsync()
+        {
+            try
+            {
+                _logger.LogInformation("GetVillaList started");
+
+                var villas = await _uow.Villas.GetAllAsync();
+
+                var result = villas.Select(v => new SelectListItem
                 {
                     Text = v.Name,
                     Value = v.Id.ToString()
-                }).ToList()
-            };
-            return model;
-        }
+                }).ToList();
 
-        public async Task<IEnumerable<SelectListItem>> GetVillaListAsync()
-        {
-            var villas =  _uow.Villas.GetAll();
-            return villas.Select(v => new SelectListItem
+                _logger.LogInformation("GetVillaList completed | Count: {Count}", result.Count);
+
+                return result;
+            }
+            catch (Exception ex)
             {
-                Text = v.Name,
-                Value = v.Id.ToString()
-            }).ToList();
-            
+                _logger.LogError(ex, "Error getting Villa list");
+                throw;
+            }
         }
 
+        // ================= UPDATE =================
         public async Task UpdateAsync(VillaNumberDto dto)
         {
-            var existing = _uow.VillaNumbers.Get(v => v.Villa_Number == dto.VillaNumber);
+            try
+            {
+                _logger.LogInformation("Update VillaNumber started | VillaNumber: {VillaNumber}", dto.VillaNumber);
 
-            if (existing == null) return;
+                var existing = await _uow.VillaNumbers.GetAsync(v => v.Villa_Number == dto.VillaNumber);
 
-            existing.VillaId = dto.VillaId;
-            existing.SpecialDetails = dto.SpecialDetails;
+                if (existing == null)
+                {
+                    _logger.LogWarning("VillaNumber not found for update | VillaNumber: {VillaNumber}", dto.VillaNumber);
+                    return;
+                }
 
-            _uow.Save();
+                existing.VillaId = dto.VillaId;
+                existing.SpecialDetails = dto.SpecialDetails;
+
+                await _uow.SaveAsync();
+
+                _logger.LogInformation("VillaNumber updated successfully | VillaNumber: {VillaNumber}", dto.VillaNumber);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating VillaNumber | VillaNumber: {VillaNumber}", dto.VillaNumber);
+                throw;
+            }
         }
     }
 }
