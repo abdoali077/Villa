@@ -5,9 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Villla.Application.Caching;
+using Villla.Application.Decorators;
 using Villla.Application.Interfaces.CommonRepos;
 using Villla.Application.Services.Implementation;
 using Villla.Application.Services.Interface;
+using Villla.Application.Services.Interface.Cashing;
 using Villla.Infrastructure.CommonImplementation.Services;
 
 namespace Villla.Application.Application.Extension
@@ -17,13 +20,39 @@ namespace Villla.Application.Application.Extension
         public static IServiceCollection AddDataAccess(this IServiceCollection services)
         {
             //register services 
+            //services.AddScoped<IEmailService, EmailService>();
+            //services.AddScoped<IDashboardService, DashboardService>();
+            //services.AddScoped<IVillaService, VillaService>();
+            //services.AddScoped<IAmenityService, AmenityService>();
+            //services.AddScoped<IVillaNumberService, VillaNumberService>();
+            //services.AddScoped<IAccountService, AccountService>();
+            //services.AddScoped<IHomeService, HomeService>();
+
+            //---------------------------------
+            services.AddMemoryCache();
+            services.AddScoped<ICacheService, MemoryCacheService>();
+
+            // ================= BASE SERVICES =================
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IDashboardService, DashboardService>();
-            services.AddScoped<IVillaService, VillaService>();
-            services.AddScoped<IAmenityService, AmenityService>();
-            services.AddScoped<IVillaNumberService, VillaNumberService>();
             services.AddScoped<IAccountService, AccountService>();
+
+            // ================= VILLA (DECORATOR) =================
+            services.AddScoped<IVillaService, VillaService>();
+            services.Decorate<IVillaService, CachedVillaService>();
+
+            // ================= AMENITY (DECORATOR) =================
+            services.AddScoped<IAmenityService, AmenityService>();
+            services.Decorate<IAmenityService, CachedAmenityService>();
+
+            // ================= VILLA NUMBER (DECORATOR) =================
+            services.AddScoped<IVillaNumberService, VillaNumberService>();
+            services.Decorate<IVillaNumberService, CachedVillaNumberService>();
+
+            // ================= HOME (DECORATOR) =================
             services.AddScoped<IHomeService, HomeService>();
+            services.Decorate<IHomeService, CachedHomeService>();
+
             return services;
         }
      
