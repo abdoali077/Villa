@@ -19,15 +19,7 @@ namespace Villla.Application.Application.Extension
     {
         public static IServiceCollection AddDataAccess(this IServiceCollection services)
         {
-            //register services 
-            //services.AddScoped<IEmailService, EmailService>();
-            //services.AddScoped<IDashboardService, DashboardService>();
-            //services.AddScoped<IVillaService, VillaService>();
-            //services.AddScoped<IAmenityService, AmenityService>();
-            //services.AddScoped<IVillaNumberService, VillaNumberService>();
-            //services.AddScoped<IAccountService, AccountService>();
-            //services.AddScoped<IHomeService, HomeService>();
-
+        
             //---------------------------------
             services.AddMemoryCache();
             services.AddScoped<ICacheService, MemoryCacheService>();

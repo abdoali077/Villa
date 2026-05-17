@@ -1,0 +1,72 @@
+@using Villla.Domain.Common
+@model dynamic
+
+@{
+    var request = ViewBag.PagedRequest as PagedRequest ?? new PagedRequest();
+    var sortOptions = ViewBag.SortOptions as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
+    var totalCount = Model?.TotalCount ?? 0;
+    var pageSize = request.PageSize;
+    var pageNumber = request.PageNumber;
+    var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+}
+
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Search</label>
+                <input type="search" name="SearchTerm" value="@request.SearchTerm" class="form-control" placeholder="Search..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Sort By</label>
+                <select name="SortColumn" class="form-select">
+                    <option value="">Default</option>
+                    @foreach (var item in sortOptions)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == request.SortColumn)">@item.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Direction</label>
+                <select name="SortDirection" class="form-select">
+                    <option value="asc" selected="@(request.SortDirection == "asc")">Ascending</option>
+                    <option value="desc" selected="@(request.SortDirection == "desc")">Descending</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Page Size</label>
+                <select name="PageSize" class="form-select">
+                    <option value="10" selected="@(request.PageSize == 10)">10</option>
+                    <option value="25" selected="@(request.PageSize == 25)">25</option>
+                    <option value="50" selected="@(request.PageSize == 50)">50</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-grid">
+                <button type="submit" class="btn btn-primary">Go</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (totalPages > 1)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(pageNumber <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-route-PageNumber="@(pageNumber - 1)" asp-route-PageSize="@request.PageSize" asp-route-SearchTerm="@request.SearchTerm" asp-route-SortColumn="@request.SortColumn" asp-route-SortDirection="@request.SortDirection">Previous</a>
+            </li>
+
+            @for (var i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == pageNumber ? "active" : "")">
+                    <a class="page-link" asp-route-PageNumber="@i" asp-route-PageSize="@request.PageSize" asp-route-SearchTerm="@request.SearchTerm" asp-route-SortColumn="@request.SortColumn" asp-route-SortDirection="@request.SortDirection">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(pageNumber >= totalPages ? "disabled" : "")">
+                <a class="page-link" asp-route-PageNumber="@(pageNumber + 1)" asp-route-PageSize="@request.PageSize" asp-route-SearchTerm="@request.SearchTerm" asp-route-SortColumn="@request.SortColumn" asp-route-SortDirection="@request.SortDirection">Next</a>
+            </li>
+        </ul>
+    </nav>
+}

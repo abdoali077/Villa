@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Villla.Domain.Common;
 using Villla.Domain.Entities;
 
 namespace Villla.Application.Interfaces.CommonRepos
@@ -11,6 +12,13 @@ namespace Villla.Application.Interfaces.CommonRepos
     public interface IRepository<T> where T : class
     {
         Task<IEnumerable<T>> GetAllAsync(
+            Expression<Func<T, bool>>? filter = null,
+            Func<IQueryable<T>, IQueryable<T>>? include = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null
+        );
+
+        Task<PagedResult<T>> GetPagedAsync(
+            PagedRequest request,
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IQueryable<T>>? include = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null

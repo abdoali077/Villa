@@ -2,15 +2,29 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Linq;
 using Villla.Application.Dtos;
 using Villla.Application.Interfaces.CommonRepos;
 using Villla.Application.Services.Interface;
+using Villla.Application.Utility;
+using Villla.Domain.Common;
 using Villla.Domain.Entities;
 
 namespace Villla.Application.Services.Implementation
 {
     public class VillaService : IVillaService
     {
+        private static readonly IDictionary<string, (Func<IQueryable<Villa>, IOrderedQueryable<Villa>> Asc, Func<IQueryable<Villa>, IOrderedQueryable<Villa>> Desc)> _sortMappings
+            = new Dictionary<string, (Func<IQueryable<Villa>, IOrderedQueryable<Villa>> Asc, Func<IQueryable<Villa>, IOrderedQueryable<Villa>> Desc)>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["default"] = (q => q.OrderBy(v => v.Id), q => q.OrderByDescending(v => v.Id)),
+                ["name"] = (q => q.OrderBy(v => v.Name), q => q.OrderByDescending(v => v.Name)),
+                ["price"] = (q => q.OrderBy(v => v.Price), q => q.OrderByDescending(v => v.Price)),
+                ["sqft"] = (q => q.OrderBy(v => v.Sqft), q => q.OrderByDescending(v => v.Sqft)),
+                ["occupancy"] = (q => q.OrderBy(v => v.Occupancy), q => q.OrderByDescending(v => v.Occupancy))
+            };
+
         private readonly IUnitOfWork _uow;
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<VillaService> _logger;
@@ -49,6 +63,60 @@ namespace Villla.Application.Services.Implementation
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in GetAll Villas");
+                throw;
+            }
+        }
+
+        // ================= GET ALL PAGED =================
+        public async Task<PagedResult<VillaDto>> GetAllPagedAsync(PagedRequest request)
+        {
+            try
+            {
+                request ??= new PagedRequest();
+                request.Normalize();
+
+                _logger.LogInformation("GetAllPaged Villas started | Page: {Page} | Size: {Size} | Search: {SearchTerm}",
+                    request.PageNumber, request.PageSize, request.SearchTerm);
+
+                var filter = QueryHelper.BuildSearchPredicate<Villa>(
+                    request.SearchTerm,
+                    v => v.Name,
+                    v => v.Description
+                );
+
+                var orderBy = QueryHelper.BuildOrderBy(request, _sortMappings);
+
+                var paged = await _uow.Villas.GetPagedAsync(
+                    request,
+                    filter,
+                    include: q => q.Include(x => x.Amenities),
+                    orderBy: orderBy
+                );
+
+                var items = paged.Items.Select(v => new VillaDto
+                {
+                    Id = v.Id,
+                    Name = v.Name,
+                    Description = v.Description,
+                    Price = v.Price,
+                    Sqft = v.Sqft,
+                    Occupancy = v.Occupancy,
+                    ImageUrl = v.ImageUrl,
+                    Amenities = v.Amenities?
+                        .Select(a => new AmenityDto
+                        {
+                            Id = a.Id,
+                            Name = a.Name
+                        }).ToList()
+                });
+
+                _logger.LogInformation("GetAllPaged Villas completed | TotalCount: {TotalCount}", paged.TotalCount);
+
+                return new PagedResult<VillaDto>(items, paged.TotalCount, paged.PageNumber, paged.PageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetAllPaged Villas");
                 throw;
             }
         }

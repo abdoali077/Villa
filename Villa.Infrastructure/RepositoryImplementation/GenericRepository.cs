@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Villla.Application.Interfaces.CommonRepos;
+using Villla.Domain.Common;
 using Villla.Infrastructure.Data;
 
 namespace Villla.Infrastructure.RepositoryImplementation
@@ -53,7 +54,7 @@ namespace Villla.Infrastructure.RepositoryImplementation
             Func<IQueryable<T>, IQueryable<T>>? include = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null)
         {
-            IQueryable<T> query = dbset;
+            IQueryable<T> query = dbset.AsNoTracking();
 
             if (filter != null)
                 query = query.Where(filter);
@@ -65,6 +66,37 @@ namespace Villla.Infrastructure.RepositoryImplementation
                 query = orderBy(query);
 
             return await query.ToListAsync();
+        }
+
+        // ================= GET PAGED =================
+        public async Task<PagedResult<T>> GetPagedAsync(
+            PagedRequest request,
+            Expression<Func<T, bool>>? filter = null,
+            Func<IQueryable<T>, IQueryable<T>>? include = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null)
+        {
+            request ??= new PagedRequest();
+            request.Normalize();
+
+            IQueryable<T> query = dbset.AsNoTracking();
+
+            if (filter != null)
+                query = query.Where(filter);
+
+            if (include != null)
+                query = include(query);
+
+            var totalCount = await query.CountAsync();
+
+            if (orderBy != null)
+                query = orderBy(query);
+
+            var items = await query
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .ToListAsync();
+
+            return new PagedResult<T>(items, totalCount, request.PageNumber, request.PageSize);
         }
     }
 }

@@ -147,7 +147,47 @@ namespace Villla.Application.Services.Implementation
                     scheme
                 );
 
-                string emailBody = $@"<div>...same html...</div>";
+                string emailBody = $@"
+<div style='font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 40px 0; width: 100%;'>
+    <table align='center' border='0' cellpadding='0' cellspacing='0' width='600' style='background-color: #ffffff; border-radius: 12px; overflow: hidden; shadow: 0 4px 12px rgba(0,0,0,0.1);'>
+        <tr>
+            <td align='center' style='padding: 30px 0; background-color: #0d6efd;'>
+                <h1 style='color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;'>VillaWeb Luxury</h1>
+            </td>
+        </tr>
+        <tr>
+            <td style='padding: 40px 30px;'>
+                <h2 style='color: #333333; margin-top: 0;'>Welcome, {user.Name}!</h2>
+                <p style='color: #666666; font-size: 16px; line-height: 1.6;'>
+                    Thanks for joining our exclusive community. We're excited to help you find your next luxury getaway. To get started, please confirm your email address by clicking the button below:
+                </p>
+
+                <table border='0' cellpadding='0' cellspacing='0' style='margin: 30px auto;'>
+                    <tr>
+                        <td align='center' style='border-radius: 50px;' bgcolor='#0d6efd'>
+                            <a href='{confirmationLink}' target='_blank' style='padding: 15px 35px; font-size: 16px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 50px; display: inline-block; font-weight: bold;'>
+                                Confirm Your Email
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+
+                <p style='color: #666666; font-size: 14px; line-height: 1.6;'>
+                    If the button doesn't work, copy and paste this link into your browser: <br>
+                    <a href='{confirmationLink}' style='color: #0d6efd;'>{confirmationLink}</a>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style='padding: 20px 30px; background-color: #f8f9fa; text-align: center;'>
+                <p style='color: #999999; font-size: 12px; margin: 0;'>
+                    &copy; {DateTime.Now.Year} VillaWeb System. All rights reserved.<br>
+                    You received this email because you signed up for an account on our website.
+                </p>
+            </td>
+        </tr>
+    </table>
+</div>";
 
                 await _emailService.SendEmailAsync(
                     user.Email!,

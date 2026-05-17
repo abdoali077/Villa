@@ -1,15 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Linq;
 using Villla.Application.Dtos;
 using Villla.Application.Interfaces.CommonRepos;
 using Villla.Application.Services.Interface;
+using Villla.Application.Utility;
+using Villla.Domain.Common;
 using Villla.Domain.Entities;
 
 namespace Villla.Application.Services.Implementation
 {
     public class AmenityService : IAmenityService
     {
+        private static readonly IDictionary<string, (Func<IQueryable<Amenity>, IOrderedQueryable<Amenity>> Asc, Func<IQueryable<Amenity>, IOrderedQueryable<Amenity>> Desc)> _sortMappings
+            = new Dictionary<string, (Func<IQueryable<Amenity>, IOrderedQueryable<Amenity>> Asc, Func<IQueryable<Amenity>, IOrderedQueryable<Amenity>> Desc)>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["default"] = (q => q.OrderBy(a => a.Id), q => q.OrderByDescending(a => a.Id)),
+                ["villaName"] = (q => q.OrderBy(a => a.Villa!.Name), q => q.OrderByDescending(a => a.Villa!.Name)),
+                ["name"] = (q => q.OrderBy(a => a.Name), q => q.OrderByDescending(a => a.Name))
+            };
+
         private readonly IUnitOfWork _uow;
         private readonly ILogger<AmenityService> _logger;
 
@@ -46,6 +58,53 @@ namespace Villla.Application.Services.Implementation
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while getting amenities");
+                throw;
+            }
+        }
+
+        // ================= GET ALL PAGED =================
+        public async Task<PagedResult<AmenityDto>> GetAllPagedAsync(PagedRequest request)
+        {
+            try
+            {
+                request ??= new PagedRequest();
+                request.Normalize();
+
+                _logger.LogInformation("AmenityService - GetAllPaged started | Page: {Page} | Size: {Size} | Search: {SearchTerm}",
+                    request.PageNumber, request.PageSize, request.SearchTerm);
+
+                var filter = QueryHelper.BuildSearchPredicate<Amenity>(
+                    request.SearchTerm,
+                    a => a.Name,
+                    a => a.Description ?? string.Empty,
+                    a => a.Villa!.Name
+                );
+
+                var orderBy = QueryHelper.BuildOrderBy(request, _sortMappings);
+
+                var paged = await _uow.Amenities.GetPagedAsync(
+                    request,
+                    filter,
+                    include: q => q.Include(a => a.Villa),
+                    orderBy: orderBy
+                );
+
+                var result = paged.Items.Select(a => new AmenityDto
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    VillaId = a.VillaId,
+                    VillaName = a.Villa != null ? a.Villa.Name : "N/A",
+                    Description = a.Description
+                });
+
+                _logger.LogInformation("AmenityService - GetAllPaged completed successfully | TotalCount: {TotalCount}", paged.TotalCount);
+
+                return new PagedResult<AmenityDto>(result, paged.TotalCount, paged.PageNumber, paged.PageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting amenity page results");
                 throw;
             }
         }

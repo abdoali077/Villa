@@ -232,8 +232,11 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Collections.Generic;
 using Villla.Application.Services.Interface;
 using Villla.Application.Dtos;
+using Villla.Domain.Common;
 
 namespace Villla.Web.Controllers
 {
@@ -248,10 +251,22 @@ namespace Villla.Web.Controllers
         }
 
         // ✅ Index
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery] PagedRequest request)
         {
-            var data = await _villaNumberService.GetAllAsync();
-            return View(data);
+            request ??= new PagedRequest();
+            request.Normalize();
+
+            var pagedResult = await _villaNumberService.GetAllPagedAsync(request);
+
+            ViewBag.PagedRequest = request;
+            ViewBag.SortOptions = new List<SelectListItem>
+            {
+                new SelectListItem("Villa Number", "villanumber"),
+                new SelectListItem("Villa Name", "villaname"),
+                new SelectListItem("Special Details", "specialdetails")
+            };
+
+            return View(pagedResult);
         }
 
         // ✅ Create (GET)
