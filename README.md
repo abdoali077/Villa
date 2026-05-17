@@ -106,6 +106,113 @@ Villa/
 
 The structure reflects a strict direction of dependency: Web → Application → Domain, supported by Infrastructure implementations.
 
+🧠 Real Domain Modeling (VERY IMPORTANT)
+🏠 Core Relationships
+1. Villa ↔ VillaNumber (1 → Many)
+A Villa represents the property model (name, price, capacity, etc.)
+A VillaNumber represents a physical unit inside that villa
+Villa (Sea View Villa)
+   ├── VillaNumber: 101
+   ├── VillaNumber: 102
+   ├── VillaNumber: 103
+💡 Why this design exists?
+
+Because in real systems:
+
+A villa is NOT a single bookable unit — it can contain multiple rooms/units.
+
+So:
+
+Booking does NOT go directly to Villa
+It goes to VillaNumber
+📅 2. VillaNumber ↔ Booking (Core Relationship)
+
+A booking always targets:
+
+Booking → VillaNumber (NOT Villa)
+Why?
+
+Because availability is calculated per unit:
+
+Villa A has 5 units
+Only 2 might be free for a date range
+So booking depends on unit-level availability
+📊 3. Booking ↔ System Rules
+
+A booking is not just a record — it is a state machine entity
+
+🔄 Booking State Management (Deep Explanation)
+🎯 Booking Lifecycle States
+Pending → Approved → CheckIn → Completed
+                    ↘ Cancelled
+🧩 State Meaning
+1. 🟡 Pending
+Booking created
+Payment NOT confirmed yet
+Slot is temporarily reserved
+
+⚠️ Business rule: Cannot be treated as confirmed availability yet
+
+2. 🟢 Approved
+Payment succeeded (Stripe confirmed)
+Booking is officially confirmed
+
+At this stage, unit is considered reserved
+
+3. 🏨 CheckIn
+Guest physically arrived
+Admin marks check-in
+
+Business rule:
+VillaNumber becomes "occupied"
+
+4. ✅ Completed
+Stay finished
+System closes booking
+
+Used for analytics + revenue tracking
+
+5. ❌ Cancelled
+Booking cancelled by admin or user
+Payment may be refunded depending on policy
+⚠️ Important Rule
+
+State transitions are STRICT — not random updates.
+
+Example:
+
+Pending → Approved → CheckIn → Completed
+
+You cannot skip states.
+
+📊 Availability Calculation (Core Business Logic)
+❓ How availability is calculated?
+
+The system does NOT check Villa only.
+
+It checks:
+
+VillaNumber availability per date range
+🧠 Logic:
+
+A VillaNumber is AVAILABLE if:
+
+No overlapping Booking exists where:
+Status ∈ (Approved, CheckIn)
+❗ Why Pending is tricky?
+
+Pending bookings:
+
+may block temporary slots
+but can expire if payment fails
+🧩 Real Rule Summary:
+Status	Blocks Availability
+Pending	⚠️ temporarily
+Approved	✅ yes
+CheckIn	✅ yes
+Completed	❌ no
+Cancelled	❌ no
+
 ## Design Decisions
 
 ### Clean Architecture
@@ -133,6 +240,15 @@ This pattern is necessary because:
 The unit of work protects data consistency and ensures a single commit boundary per business transaction.
 
 ### Decorator Pattern
+
+Caching is NOT inside business logic.
+
+Instead:
+
+IVillaService
+   ↑
+CachedVillaService (Decorator)
+
 
 Caching is implemented through decorators rather than inside service implementations. The decorated service wraps the core service and injects cross-cutting caching behavior externally.
 
