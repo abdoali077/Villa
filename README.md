@@ -106,112 +106,132 @@ Villa/
 
 The structure reflects a strict direction of dependency: Web → Application → Domain, supported by Infrastructure implementations.
 
-🧠 Real Domain Modeling (VERY IMPORTANT)
-🏠 Core Relationships
+
+- Real Domain Modeling (VERY IMPORTANT)
+- Core Relationships
 1. Villa ↔ VillaNumber (1 → Many)
-A Villa represents the property model (name, price, capacity, etc.)
-A VillaNumber represents a physical unit inside that villa
+
+A Villa represents the property model (name, price, capacity, etc.).
+A VillaNumber represents a physical unit inside that villa.
+
 Villa (Sea View Villa)
    ├── VillaNumber: 101
    ├── VillaNumber: 102
    ├── VillaNumber: 103
-💡 Why this design exists?
+- Why this design exists
 
-Because in real systems:
+In real-world hospitality systems, a villa is not always a single bookable unit. Instead, it may contain multiple physical units or rooms.
 
-A villa is NOT a single bookable unit — it can contain multiple rooms/units.
+Therefore:
 
-So:
+A Villa is a catalog-level entity
+A VillaNumber is the actual bookable inventory unit
+- 2. VillaNumber ↔ Booking (Core Relationship)
 
-Booking does NOT go directly to Villa
-It goes to VillaNumber
-📅 2. VillaNumber ↔ Booking (Core Relationship)
+A Booking always targets a VillaNumber, not a Villa.
 
-A booking always targets:
-
-Booking → VillaNumber (NOT Villa)
 Why?
 
-Because availability is calculated per unit:
-
-Villa A has 5 units
-Only 2 might be free for a date range
-So booking depends on unit-level availability
-📊 3. Booking ↔ System Rules
-
-A booking is not just a record — it is a state machine entity
-
-🔄 Booking State Management (Deep Explanation)
-🎯 Booking Lifecycle States
-Pending → Approved → CheckIn → Completed
-                    ↘ Cancelled
-🧩 State Meaning
-1. 🟡 Pending
-Booking created
-Payment NOT confirmed yet
-Slot is temporarily reserved
-
-⚠️ Business rule: Cannot be treated as confirmed availability yet
-
-2. 🟢 Approved
-Payment succeeded (Stripe confirmed)
-Booking is officially confirmed
-
-At this stage, unit is considered reserved
-
-3. 🏨 CheckIn
-Guest physically arrived
-Admin marks check-in
-
-Business rule:
-VillaNumber becomes "occupied"
-
-4. ✅ Completed
-Stay finished
-System closes booking
-
-Used for analytics + revenue tracking
-
-5. ❌ Cancelled
-Booking cancelled by admin or user
-Payment may be refunded depending on policy
-⚠️ Important Rule
-
-State transitions are STRICT — not random updates.
+Because availability is calculated at the unit level.
 
 Example:
 
+Villa A contains 5 VillaNumbers
+Only 2 units may be available for a given date range
+
+Therefore, booking logic must operate on:
+
+Booking → VillaNumber
+
+This ensures accurate inventory tracking and prevents overbooking.
+
+- 3. Booking as a State Machine
+
+A Booking is not a simple record.
+It represents a state-driven business workflow.
+
+- Booking State Management (Deep Explanation)
+- Booking Lifecycle States
+Pending → Approved → CheckIn → Completed
+                    ↘ Cancelled
+🧩 State Meaning
+1. Pending
+Booking is created
+Payment has not been confirmed
+The slot is temporarily reserved
+
+Business rule:
+
+Pending bookings do not represent final confirmed reservations
+2. Approved
+Payment has been successfully confirmed (Stripe)
+Booking becomes officially confirmed
+
+Business rule:
+
+VillaNumber is now considered reserved for the selected dates
+3. CheckIn
+Guest physically arrives
+Admin marks the check-in event
+
+Business rule:
+
+VillaNumber status becomes occupied for the duration of stay
+4. Completed
+Guest finishes stay
+Booking lifecycle is closed
+
+Purpose:
+
+Used for reporting, analytics, and revenue calculation
+5. Cancelled
+Booking is cancelled by user or admin
+May occur before or after payment depending on business rules
+- Important Rule: Strict State Transitions
+
+State changes are controlled and must follow a strict workflow.
+
+Valid flow example:
+
 Pending → Approved → CheckIn → Completed
 
-You cannot skip states.
+Invalid actions:
 
-📊 Availability Calculation (Core Business Logic)
-❓ How availability is calculated?
+Skipping states
+Directly moving from Pending → Completed
+Re-opening completed bookings
 
-The system does NOT check Villa only.
+This ensures data consistency and predictable business behavior.
 
-It checks:
+- Availability Calculation (Core Business Logic)
+- How availability is calculated?
 
-VillaNumber availability per date range
-🧠 Logic:
+Availability is NOT computed at Villa level.
+It is computed at the VillaNumber level per date range.
 
-A VillaNumber is AVAILABLE if:
+- Core Rule
+
+A VillaNumber is considered available if:
 
 No overlapping Booking exists where:
 Status ∈ (Approved, CheckIn)
-❗ Why Pending is tricky?
+- Why Pending is Special
 
-Pending bookings:
+Pending bookings introduce a temporary reservation state:
 
-may block temporary slots
-but can expire if payment fails
-🧩 Real Rule Summary:
-Status	Blocks Availability
-Pending	⚠️ temporarily
-Approved	✅ yes
-CheckIn	✅ yes
-Completed	❌ no
-Cancelled	❌ no
+They may block availability temporarily
+They can expire if payment is not completed
+They are not considered fully confirmed bookings
+
+- Key Insight
+The system is designed as a unit-level inventory booking engine, not a simple villa reservation system.
+
+-This allows:
+
+Accurate availability calculation
+Prevention of overbooking
+Real-world hospitality modeling
+Scalable booking logic for enterprise systems
 
 ## Design Decisions
 
