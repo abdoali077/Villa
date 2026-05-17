@@ -1,8 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Villla.Application.Dtos;
 using Villla.Application.Services.Interface;
 using Villla.Application.Services.Interface.Cashing;
+using Villla.Application.Utility;
+using Villla.Domain.Common;
 
 namespace Villla.Application.Decorators
 {
@@ -56,6 +61,29 @@ namespace Villla.Application.Decorators
                 _logger.LogError(ex, "Error in GetAll Amenities");
                 throw;
             }
+        }
+
+        // ================= GET ALL PAGED =================
+        public async Task<PagedResult<AmenityDto>> GetAllPagedAsync(PagedRequest request)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            var cacheKey = CacheKeyHelper.BuildPagedKey("amenities", request);
+            var cached = _cache.Get<PagedResult<AmenityDto>>(cacheKey);
+
+            if (cached != null)
+            {
+                _logger.LogInformation("Cache HIT - Amenities GetAllPaged | {CacheKey}", cacheKey);
+                return cached;
+            }
+
+            _logger.LogInformation("Cache MISS - Amenities GetAllPaged | {CacheKey}", cacheKey);
+
+            var result = await _inner.GetAllPagedAsync(request);
+
+            _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
+            return result;
         }
 
         // ================= GET BY ID =================
@@ -191,6 +219,7 @@ namespace Villla.Application.Decorators
                 _cache.Remove(KEY_ALL);
                 _cache.Remove(KEY_VILLA_LIST);
                 _cache.Remove(GetKey(id));
+                _cache.RemoveByPrefix("amenities_page_");
 
                 _logger.LogInformation("Amenity cache invalidated for Id {Id}", id);
             }

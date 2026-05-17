@@ -1,8 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Villla.Application.Dtos;
 using Villla.Application.Services.Interface;
 using Villla.Application.Services.Interface.Cashing;
+using Villla.Application.Utility;
+using Villla.Domain.Common;
 
 namespace Villla.Application.Decorators
 {
@@ -105,6 +110,30 @@ namespace Villla.Application.Decorators
             }
         }
 
+        // ================= GET ALL PAGED =================
+        public async Task<PagedResult<VillaNumberDto>> GetAllPagedAsync(PagedRequest request)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            var cacheKey = CacheKeyHelper.BuildPagedKey("villanumbers", request);
+            var cached = _cache.Get<PagedResult<VillaNumberDto>>(cacheKey);
+
+            if (cached != null)
+            {
+                _logger.LogInformation("Cache HIT - VillaNumbers GetAllPaged | {CacheKey}", cacheKey);
+                return cached;
+            }
+
+            _logger.LogInformation("Cache MISS - VillaNumbers GetAllPaged | {CacheKey}", cacheKey);
+
+            var result = await _inner.GetAllPagedAsync(request);
+
+            _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
+
+            return result;
+        }
+
         // ================= GET BY ID =================
         public async Task<VillaNumberDto?> GetByIdAsync(int id)
         {
@@ -196,6 +225,7 @@ namespace Villla.Application.Decorators
                 _cache.Remove(KEY_ALL);
                 _cache.Remove(KEY_VILLA_LIST);
                 _cache.Remove(GetKey(id));
+                _cache.RemoveByPrefix("villanumbers_page_");
 
                 _logger.LogInformation("Cache invalidated for VillaNumber {Id}", id);
             }

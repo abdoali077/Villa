@@ -1,9 +1,9 @@
-﻿@model IEnumerable<VillaNumberDto>
+﻿@model PagedResult<VillaNumberDto>
 
 <div class="container mt-5">
     <div class="row pt-4 pb-3">
         <div class="col-6">
-            <h2 class="text-primary">Villa List</h2>
+            <h2 class="text-primary">Villa Number List</h2>
         </div>
         <div class="col-6 text-end">
             <a asp-controller="VillaNumber" asp-action="Create" class="btn btn-outline-primary">
@@ -11,6 +11,8 @@
             </a>
         </div>
     </div>
+
+    @await Html.PartialAsync("_Pagination", Model)
 
     <div class="card shadow border-0">
         <div class="card-body p-4">
@@ -23,7 +25,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
+                    @foreach (var item in Model.Items)
                     {
                         <tr>
                             <td>@item?.VillaName</td>

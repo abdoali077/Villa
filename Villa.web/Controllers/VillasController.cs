@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Villla.Application.Dtos;
 using Villla.Application.Interfaces.CommonRepos;
 using Villla.Application.Services.Interface;
+using Villla.Domain.Common;
 using Villla.Domain.Entities;
 using Villla.Infrastructure.Data;
 using Villla.Infrastructure.RepositoryImplementation;
@@ -198,10 +200,23 @@ namespace Villla.Web.Controllers
             _villaService = villaService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery] PagedRequest request)
         {
-            var villas = await _villaService.GetAllAsync();
-            return View(villas);
+            request ??= new PagedRequest();
+            request.Normalize();
+
+            var pagedResult = await _villaService.GetAllPagedAsync(request);
+
+            ViewBag.PagedRequest = request;
+            ViewBag.SortOptions = new List<SelectListItem>
+            {
+                new SelectListItem("Name", "name"),
+                new SelectListItem("Price", "price"),
+                new SelectListItem("Sqft", "sqft"),
+                new SelectListItem("Occupancy", "occupancy")
+            };
+
+            return View(pagedResult);
         }
 
         public IActionResult Create()

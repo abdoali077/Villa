@@ -1,4 +1,4 @@
-﻿@model IEnumerable<AmenityDto>
+﻿@model PagedResult<AmenityDto>
 
 <div class="container mt-5">
     <div class="row pt-4 pb-3">
@@ -12,6 +12,8 @@
         </div>
     </div>
 
+    @await Html.PartialAsync("_Pagination", Model)
+
     <div class="card shadow border-0">
         <div class="card-body p-4">
             <table class="table table-bordered table-striped table-hover mt-3">
@@ -24,7 +26,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
+                    @foreach (var item in Model.Items)
                     {
                         <tr>
                             <td>@item.VillaName</td>
